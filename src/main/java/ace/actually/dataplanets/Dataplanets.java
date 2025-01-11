@@ -46,6 +46,7 @@ public class Dataplanets
         Reg.REGISTRATE.registerRegistrate();
 
         MinecraftForge.EVENT_BUS.register(this);
+
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
         ;

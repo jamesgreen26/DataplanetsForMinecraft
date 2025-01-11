@@ -6,7 +6,5 @@ public class Reg {
 
     public static final GTRegistrate REGISTRATE = GTRegistrate.create(Dataplanets.MODID);
 
-    static {
-        Reg.REGISTRATE.creativeModeTab(() -> DPTabs.TAB);
-    }
+
 }

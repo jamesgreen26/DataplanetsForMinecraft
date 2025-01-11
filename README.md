@@ -7,3 +7,5 @@ A mod that uses slightly cursed datapack generation (right now) to add infinite 
 - This mod currently relies on GCYR, eventually it will be universal (I hope)
 - eventually this mod may not depend on GTCEU, however I thought it was better to work with a base tech mod first
   - this is also because it means I can add lakes of cool fluids from GTCEU
+
+This project is made with help and inspiration from team GTIC (more about them to come)

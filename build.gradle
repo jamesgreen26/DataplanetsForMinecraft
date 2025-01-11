@@ -207,6 +207,8 @@ dependencies {
     runtimeOnly fg.deobf("dev.toma.configuration:configuration-forge-1.20.1:2.2.0")
     runtimeOnly fg.deobf("dev.architectury:architectury-forge:9.2.14")
 
+    implementation fg.deobf("curse.maven:emi-580555:6075448")
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

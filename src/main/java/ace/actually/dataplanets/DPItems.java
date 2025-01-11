@@ -8,7 +8,9 @@ import net.minecraft.world.item.Item;
 
 public class DPItems {
 
-
+    static {
+        Reg.REGISTRATE.creativeModeTab(() -> DPTabs.TAB);
+    }
 
     public static ItemEntry<TheoryItem> THEORY_VISIBLE = Reg.REGISTRATE.item("theory_visible", a->new TheoryItem(a,1)).properties((a)->a).lang("visible theory").register();
     public static ItemEntry<TheoryItem> THEORY_RADIO = Reg.REGISTRATE.item("theory_radio", a->new TheoryItem(a,1)).properties((a)->a).lang("Radio Theory").register();
