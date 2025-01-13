@@ -1,30 +1,18 @@
 package ace.actually.dataplanets;
 
-import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeGenerationSettings;
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.PointedDripstoneFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -246,6 +234,7 @@ public class StarSystemCreator {
             planetData.putInt("waterFogColour",random.nextInt(16777215));
             planetData.putInt("grassColour",random.nextInt(16777215));
             planetData.putInt("foliageColour",random.nextInt(16777215));
+            planetData.putString("generalBlock",SURFACE_BLOCKS[random.nextInt(SURFACE_BLOCKS.length)]);
 
             List<String> biome = List.of("{\n" +
                     "  \"temperature\": TM,\n".replace("TM",""+(float)planetData.getInt("temperature")/500f) +
@@ -276,7 +265,8 @@ public class StarSystemCreator {
                     "      \"minecraft:large_dripstone\",\n" +
                     "      \"minecraft:dripstone_cluster\",\n" +
                     "      \"minecraft:pointed_dripstone\"\n" +
-                            genAdditionalFeatures(planetData,uuid,random)+
+                            genLakes(planetData,uuid,random)+
+                            genRocks(planetData,uuid,random)+
                     "    ]\n" +
                     "  ]\n" +
                     "}");
@@ -287,14 +277,13 @@ public class StarSystemCreator {
             planetData.putFloat("nr2", (float) random.nextInt(2000) /1000f);
             planetData.putFloat("nr3", (float) random.nextInt(2000) /1000f);
 
+            String alsoMakeGrass  = "";
             if(planetData.getString("hasAtmosphere").equals("true") && planetData.getString("hasOxygen").equals("true"))
             {
-                planetData.putString("generalBlock","minecraft:grass_block");
+                alsoMakeGrass = alsoMakeGrass();
             }
-            else
-            {
-                planetData.putString("generalBlock",SURFACE_BLOCKS[random.nextInt(SURFACE_BLOCKS.length)]);
-            }
+
+
 
 
             //TODO: default fluid could be anything, right?
@@ -339,7 +328,7 @@ public class StarSystemCreator {
                     "  \"spawn_target\": [],\n" +
                     "  \"surface_rule\": {\n" +
                     "    \"type\": \"minecraft:sequence\",\n" +
-                    "    \"sequence\": [SE]\n".replace("SE",makeSequenceEntry(planetData)) +
+                    "    \"sequence\": [SE]\n".replace("SE",makeSequenceEntry(planetData)+alsoMakeGrass) +
                     "  }\n" +
                     "}");
 
@@ -414,115 +403,6 @@ public class StarSystemCreator {
 
     }
 
-    public static void buildRPFromData(CompoundTag tagIn)
-    {
-        String LOCLOC = Path.of("./").toAbsolutePath()+"\\resourcepacks\\";
-
-        for(String system: tagIn.getAllKeys())
-        {
-            CompoundTag tag = tagIn.getCompound(system);
-
-            String uuid = UUID.randomUUID().toString();
-            String systemName = tag.getString("systemName");
-            List<String> solar_system = List.of("{\n" +
-                    "  \"galaxy\": \"gcyr:milky_way\",\n" +
-                    "  \"solar_system\": \"dataplanets:SW\",\n".replace("SW",systemName) +
-                    "  \"sun\": \"gcyr:textures/sky/sunmenu.png\",\n" +
-                    "  \"sun_scale\": 60,\n" +
-                    "  \"button_color\": 4284861158,\n" +
-                    "  \"ring_color\": 3357815419\n" +
-                    "}");
-
-
-
-            try {
-                FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\solar_systems\\"+systemName+".json"),solar_system);
-                FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\pack.mcmeta"), List.of("""
-                    {
-                    \t"pack": {
-                    \t\t"description": "Generated by Dataplanets",
-                    \t\t"pack_format": 34
-                    \t}
-                    }"""));
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            StringBuilder langFile = new StringBuilder("{\"dataplanets.").append(systemName).append("\":\"");
-            String rebuild = systemName.toUpperCase();
-            rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2);
-            langFile.append(rebuild).append("\",");
-            for(String key: tag.getAllKeys())
-            {
-                if(!tag.getCompound(key).isEmpty())
-                {
-                    CompoundTag planetData = tag.getCompound(key);
-                    String planetName = planetData.getString("name");
-                    List<String> planet_rings = List.of("{\n" +
-                            "  \"galaxy\": \"gcyr:milky_way\",\n" +
-                            "  \"solar_system\": \"dataplanets:SOMEWHERE\",\n".replace("SOMEWHERE",systemName) +
-                            "  \"texture\": \"gcyr:textures/sky/deimos.png\",\n" +
-                            "  \"speed\": S,\n".replace("S",""+planetData.getInt("yearDays")) +
-                            "  \"scale\": S,\n".replace("S",""+planetData.getInt("scaleClient")) +
-                            "  \"radius\": X\n".replace("X",""+planetData.getFloat("radiusClient")) +
-                            "}");
-
-                    List<String> sky_renderer = List.of("{\n" +
-                            "  \"world\": \"dataplanets:SW\",\n".replace("SW",planetName) +
-                            "  \"stars\": {\n" +
-                            "    \"fancy_count\": 13000,\n" +
-                            "    \"fast_count\": 6000,\n" +
-                            "    \"colored_stars\": true,\n" +
-                            "    \"daylight_visible\": true\n" +
-                            "  },\n" +
-                            "  \"sunset_color\": \"none\",\n" +
-                            "  \"dimension_effects\": {\n" +
-                            "    \"type\": \"none\"\n" +
-                            "  },\n" +
-                            "  \"cloud_effects\": \"none\",\n" +
-                            "  \"weather_effects\": \"none\",\n" +
-                            "  \"horizon_angle\": 0,\n" +
-                            "  \"sky_objects\": [\n" +
-                            "    {\n" +
-                            "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
-                            "      \"blending\": true,\n" +
-                            "      \"render_type\": \"dynamic\",\n" +
-                            "      \"scale\": SZ,\n".replace("SZ",""+(planetData.getInt("solarPower")+1)) +
-                            "      \"rotation\": [\n" +
-                            "        0.0,\n" +
-                            "        -90.0,\n" +
-                            "        0.0\n" +
-                            "      ]\n" +
-                            "    }\n" +
-                            "  ]\n" +
-                            "}");
-
-                    langFile.append("\"level.").append(planetName).append("\":\"");
-                    rebuild = planetName.toUpperCase();
-                    rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2,rebuild.length()-1)+" "+rebuild.toLowerCase().charAt(rebuild.length()-1);
-                    langFile.append(rebuild).append("\",");
-
-                    try {
-                        FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\planet_rings\\"+systemName+"\\"+planetName+".json"),planet_rings);
-                        FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\sky_renderers\\"+planetName+".json"),sky_renderer);
-                        FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\assets\\dataplanets\\lang\\en_us.json"),List.of(langFile.substring(0,langFile.length()-1)+"}"));
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-            try {
-                FileUtils.writeLines(new File(LOCLOC+"pack"+uuid+"\\assets\\dataplanets\\lang\\en_us.json"),List.of(langFile.substring(0,langFile.length()-1)+"}"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-
-
 
     private static String makeSequenceEntry(CompoundTag planetData)
     {
@@ -546,6 +426,47 @@ public class StarSystemCreator {
                 "        }\n" +
                 "      }";
     }
+    private static String alsoMakeGrass()
+    {
+        return ",{\n" +
+                "                \"type\": \"minecraft:condition\",\n" +
+                "                \"if_true\": {\n" +
+                "                  \"type\": \"minecraft:noise_threshold\",\n" +
+                "                  \"max_threshold\": 1.7976931348623157e+308,\n" +
+                "                  \"min_threshold\": -0.12121212121212122,\n" +
+                "                  \"noise\": \"minecraft:surface\"\n" +
+                "                },\n" +
+                "                \"then_run\": {\n" +
+                "                  \"type\": \"minecraft:sequence\",\n" +
+                "                  \"sequence\": [\n" +
+                "                    {\n" +
+                "                      \"type\": \"minecraft:condition\",\n" +
+                "                      \"if_true\": {\n" +
+                "                        \"type\": \"minecraft:water\",\n" +
+                "                        \"add_stone_depth\": false,\n" +
+                "                        \"offset\": 0,\n" +
+                "                        \"surface_depth_multiplier\": 0\n" +
+                "                      },\n" +
+                "                      \"then_run\": {\n" +
+                "                        \"type\": \"minecraft:block\",\n" +
+                "                        \"result_state\": {\n" +
+                "                          \"Name\": \"minecraft:grass_block\",\n" +
+                "                          \"Properties\": {\n" +
+                "                            \"snowy\": \"false\"\n" +
+                "                          }\n" +
+                "                        }\n" +
+                "                      }\n" +
+                "                    },\n" +
+                "                    {\n" +
+                "                      \"type\": \"minecraft:block\",\n" +
+                "                      \"result_state\": {\n" +
+                "                        \"Name\": \"minecraft:dirt\"\n" +
+                "                      }\n" +
+                "                    }\n" +
+                "                  ]\n" +
+                "                }\n" +
+                "              }";
+    }
 
     private static String makeFinalDensity(CompoundTag planetData)
     {
@@ -568,59 +489,7 @@ public class StarSystemCreator {
     }
 
 
-    private static ResourceKey<Biome> planetDataToBiome(MinecraftServer server,CompoundTag planetData)
-    {
-        RegistryAccess.Frozen registryAccess = server.registryAccess();
-
-        Registry<Biome> biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
-
-        Registry<ConfiguredWorldCarver<?>> carversRegistry = server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER);
-        Holder.Reference<ConfiguredWorldCarver<?>> canyon = carversRegistry.getHolderOrThrow(Carvers.CANYON);
-        Holder.Reference<ConfiguredWorldCarver<?>> cave = carversRegistry.getHolderOrThrow(Carvers.CAVE);
-        Holder.Reference<ConfiguredWorldCarver<?>> cave_extra = carversRegistry.getHolderOrThrow(Carvers.CAVE_EXTRA_UNDERGROUND);
-
-        Registry<PlacedFeature> placedFeatureRegistry = server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
-        Holder.Reference<PlacedFeature> dripstone = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE,ResourceLocation.tryParse("large_dripstone"))).get();
-        Holder.Reference<PlacedFeature> dripstone_cluster = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE,ResourceLocation.tryParse("dripstone_cluster"))).get();
-        Holder.Reference<PlacedFeature> pointed_dripstone = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE,ResourceLocation.tryParse("pointed_dripstone"))).get();
-
-        Biome biome = new Biome.BiomeBuilder()
-                .downfall(0)
-                .temperature(0.93f)
-                .hasPrecipitation(false)
-                .specialEffects(new BiomeSpecialEffects.Builder()
-                        .skyColor(planetData.getInt("skyColour"))
-                        .fogColor(planetData.getInt("fogColour"))
-                        .waterColor(planetData.getInt("waterColour"))
-                        .waterFogColor(planetData.getInt("waterFogColour"))
-                        .grassColorOverride(planetData.getInt("grassColour"))
-                        .foliageColorOverride(planetData.getInt("foliage")).build())
-                .mobSpawnSettings(new MobSpawnSettings.Builder().build())
-                .generationSettings(new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.EMPTY)
-                        .addCarver(GenerationStep.Carving.AIR,canyon)
-                        .addCarver(GenerationStep.Carving.AIR,cave)
-                        .addCarver(GenerationStep.Carving.AIR,cave_extra)
-                        .addFeature(0,dripstone)
-                        .addFeature(0,dripstone_cluster)
-                        .addFeature(0,pointed_dripstone).build()).build();
-
-
-
-        ResourceKey<Biome> biomeKey = ResourceKey.create(biomeRegistry.key(), ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_terrain"));
-
-
-        ((IUnfreezableRegistry) biomeRegistry).setRegFrozen(false);
-        ((MappedRegistry<Biome>) biomeRegistry).register(
-                biomeKey,
-                biome,
-                Lifecycle.experimental() // use built-in registration info for now
-        );
-        ((IUnfreezableRegistry) biomeRegistry).setRegFrozen(true);
-
-        return biomeKey;
-    }
-
-    private static String genAdditionalFeatures(CompoundTag planetData,String uuid,RandomSource randomSource)
+    private static String genLakes(CompoundTag planetData, String uuid, RandomSource randomSource)
     {
         StringBuilder features = new StringBuilder();
 
@@ -669,7 +538,9 @@ public class StarSystemCreator {
                 matName = material.getName();
             }
 
-            List<String> placed_feature = List.of("{\n" +
+
+
+            List<String> lake_placed_feature = List.of("{\n" +
                     "  \"feature\": \"LAKE\",\n".replace("LAKE","dataplanets:"+matName+"_lake") +
                     "  \"placement\": [\n" +
                     "    {\n" +
@@ -688,7 +559,7 @@ public class StarSystemCreator {
                     "    }\n" +
                     "  ]\n" +
                     "}");
-            List<String> configured_feature = List.of("{\n" +
+            List<String> lake_configured_feature = List.of("{\n" +
                     "  \"type\": \"minecraft:lake\",\n" +
                     "  \"config\": {\n" +
                     "    \"fluid\": {\n" +
@@ -710,9 +581,61 @@ public class StarSystemCreator {
                     "}");
 
             try {
-                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+matName+"_lake"+".json"),placed_feature);
-                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+matName+"_lake"+".json"),configured_feature);
+                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+matName+"_lake"+".json"),lake_placed_feature);
+                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+matName+"_lake"+".json"),lake_configured_feature);
                 features.append(",\"dataplanets:").append(matName).append("_lake\"");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+
+        return features.toString();
+    }
+    private static String genRocks(CompoundTag planetData, String uuid, RandomSource randomSource)
+    {
+        StringBuilder features = new StringBuilder();
+        String matName = SURFACE_BLOCKS[randomSource.nextInt(SURFACE_BLOCKS.length)];
+        planetData.putString("rock_block",matName);
+        String unqualified = matName.split(":")[1];
+
+        for (int i = 0; i < 1; i++) {
+
+
+
+            List<String> placed_feature = List.of("{\n" +
+                    "  \"feature\": \"dataplanets:EE_rocks\",\n".replace("EE",unqualified) +
+                    "  \"placement\": [\n" +
+                    "    {\n" +
+                    "      \"type\": \"minecraft:count\",\n" +
+                    "      \"count\": 2\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"type\": \"minecraft:in_square\"\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"type\": \"minecraft:heightmap\",\n" +
+                    "      \"heightmap\": \"MOTION_BLOCKING\"\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"type\": \"minecraft:biome\"\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}");
+            List<String> configured_feature = List.of("{\n" +
+                    "  \"type\": \"minecraft:forest_rock\",\n" +
+                    "  \"config\": {\n" +
+                    "    \"state\": {\n" +
+                    "      \"Name\": \"EE\"\n".replace("EE",matName) +
+                    "    }\n" +
+                    "  }\n" +
+                    "}");
+
+            try {
+                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+unqualified+"_rocks"+".json"),placed_feature);
+                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+unqualified+"_rocks"+".json"),configured_feature);
+                features.append(",\"dataplanets:").append(unqualified).append("_rocks\"");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
