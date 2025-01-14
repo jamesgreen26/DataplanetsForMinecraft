@@ -6,9 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.PointedDripstoneFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -228,6 +225,13 @@ public class StarSystemCreator {
                     "  }\n" +
                     "}");
 
+            List<String> orbit_dimension = List.of("{\n" +
+                    "  \"type\": \"gcyr:space\",\n" +
+                    "  \"generator\": {\n" +
+                    "    \"type\": \"gcyr:space\"\n" +
+                    "  }\n" +
+                    "}");
+
             planetData.putInt("skyColour",random.nextInt(16777215));
             planetData.putInt("fogColour",random.nextInt(16777215));
             planetData.putInt("waterColour",random.nextInt(16777215));
@@ -262,9 +266,7 @@ public class StarSystemCreator {
                     "  },\n" +
                     "  \"features\": [\n" +
                     "    [\n" +
-                    "      \"minecraft:large_dripstone\",\n" +
-                    "      \"minecraft:dripstone_cluster\",\n" +
-                    "      \"minecraft:pointed_dripstone\"\n" +
+                            shouldGenDripstone(random)+
                             genLakes(planetData,uuid,random)+
                             genRocks(planetData,uuid,random)+
                     "    ]\n" +
@@ -328,7 +330,7 @@ public class StarSystemCreator {
                     "  \"spawn_target\": [],\n" +
                     "  \"surface_rule\": {\n" +
                     "    \"type\": \"minecraft:sequence\",\n" +
-                    "    \"sequence\": [SE]\n".replace("SE",makeSequenceEntry(planetData)+alsoMakeGrass) +
+                    "    \"sequence\": [SE]\n".replace("SE", makeBedrockLayer()+alsoMakeGrass) +
                     "  }\n" +
                     "}");
 
@@ -373,6 +375,61 @@ public class StarSystemCreator {
                     "    }\n" +
                     "  ]\n" +
                     "}");
+
+            List<String> orbit_skybox = List.of("{\n" +
+                    "  \"world\": \"dataplanets:SW_orbit\",\n".replace("SW",planetName) +
+                    "  \"stars\": {\n" +
+                    "    \"fancy_count\": 13000,\n" +
+                    "    \"fast_count\": 6000,\n" +
+                    "    \"colored_stars\": true,\n" +
+                    "    \"daylight_visible\": true\n" +
+                    "  },\n" +
+                    "  \"sunset_color\": \"none\",\n" +
+                    "  \"dimension_effects\": {\n" +
+                    "    \"type\": \"none\"\n" +
+                    "  },\n" +
+                    "  \"cloud_effects\": \"none\",\n" +
+                    "  \"weather_effects\": \"none\",\n" +
+                    "  \"horizon_angle\": 0,\n" +
+                    "  \"sky_objects\": [\n" +
+                    "    {\n" +
+                    "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
+                    "      \"blending\": true,\n" +
+                    "      \"render_type\": \"dynamic\",\n" +
+                    "      \"scale\": SZ,\n".replace("SZ",""+(planetData.getInt("solarPower")+2)) +
+                    "      \"rotation\": [\n" +
+                    "        0.0,\n" +
+                    "        -90.0,\n" +
+                    "        0.0\n" +
+                    "      ]\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"texture\": \"gcyr:textures/sky/mercury.png\",\n" +
+                    "      \"blending\": true,\n" +
+                    "      \"render_type\": \"static\",\n" +
+                    "      \"scale\": 15.0,\n" +
+                    "      \"rotation\": [\n" +
+                    "        0.0,\n" +
+                    "        0.0,\n" +
+                    "        0.0\n" +
+                    "      ]\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"texture\": \"gcyr:textures/sky/light.png\",\n" +
+                    "      \"blending\": true,\n" +
+                    "      \"render_type\": \"static\",\n" +
+                    "      \"scale\": 20.0,\n" +
+                    "      \"color\": 16777164,\n" +
+                    "      \"rotation\": [\n" +
+                    "        0.0,\n" +
+                    "        0.0,\n" +
+                    "        0.0\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}");
+
+
             langFile.append("\"level.").append(planetName).append("\":\"");
             rebuild = planetName.toUpperCase();
             rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2,rebuild.length()-1)+" "+rebuild.toLowerCase().charAt(rebuild.length()-1);
@@ -381,9 +438,11 @@ public class StarSystemCreator {
             try {
                 FileUtils.writeLines(new File(RECLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\planet_rings\\"+systemName+"\\"+planetName+".json"),planet_rings);
                 FileUtils.writeLines(new File(RECLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\sky_renderers\\"+planetName+".json"),sky_renderer);
+                FileUtils.writeLines(new File(RECLOC+"pack"+uuid+"\\assets\\dataplanets\\gcyr\\planet_assets\\sky_renderers\\"+planetName+"_orbit.json"),orbit_skybox);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\gcyr\\planets\\"+planetName+".json"),planet);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\dimension_type\\"+planetName+".json"),dimension_type);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\dimension\\"+planetName+".json"),dimension);
+                FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\dimension\\"+planetName+"_orbit.json"),orbit_dimension);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\biome\\"+planetName+"_terrain.json"),biome);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\noise_settings\\"+planetName+".json"),noise_settings);
             } catch (IOException e) {
@@ -403,8 +462,33 @@ public class StarSystemCreator {
 
     }
 
+    private static String shouldGenDripstone(RandomSource source)
+    {
+        //\"minecraft:large_dripstone\",\n" +
+        //                    "      \"minecraft:dripstone_cluster\",\n" +
+        //                    "      \"minecraft:pointed_dripstone\"\n" +
+        StringBuilder stringBuilder = new StringBuilder();
+        if(source.nextInt(5)==0)
+        {
+            stringBuilder.append("\"minecraft:dripstone_cluster\",\n");
+        }
+        if(source.nextInt(5)==0)
+        {
+            stringBuilder.append("\"minecraft:large_dripstone\",\n");
+        }
+        if(source.nextInt(5)==0)
+        {
+            stringBuilder.append("\"minecraft:pointed_dripstone\",\n");
+        }
+        String v = stringBuilder.toString();
 
-    private static String makeSequenceEntry(CompoundTag planetData)
+        if(v.isEmpty()) return "";
+        return v.substring(0,v.length()-1);
+    }
+
+
+
+    private static String makeBedrockLayer()
     {
         return "{\n" +
                 "        \"type\": \"minecraft:condition\",\n" +
@@ -583,7 +667,7 @@ public class StarSystemCreator {
             try {
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+matName+"_lake"+".json"),lake_placed_feature);
                 FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+matName+"_lake"+".json"),lake_configured_feature);
-                features.append(",\"dataplanets:").append(matName).append("_lake\"");
+                features.append("\"dataplanets:").append(matName).append("_lake\"");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
