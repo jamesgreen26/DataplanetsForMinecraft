@@ -4,11 +4,13 @@ import ace.actually.dataplanets.machine.ObservatoryMachine;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.data.RotationState;
+import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.common.data.GCYMBlocks;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
+import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 
 
@@ -68,7 +70,7 @@ public class DPMachines {
                     .aisle("B  TIKOT  B","B    S    B","B         B","B         B","B         B","B         B","KKKKKKKKKKK","KKKKKKKKKKK","B         B","B         B","B         B")
                     .where('S', controller(blocks(definition.getBlock())))
                     .where('V',blocks(GCYMBlocks.CASING_LASER_SAFE_ENGRAVING.get()))
-                    .where('B', blocks(GTBlocks.MARBLE.get()))
+                    .where('B', blocks(GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.frameGt,GTMaterials.StainlessSteel).get()))
                     .where('K', blocks(GTBlocks.CASING_STAINLESS_CLEAN.get()))
                     .where('Z', blocks(GTBlocks.CASING_LAMINATED_GLASS.get()))
                     .where(' ', any())

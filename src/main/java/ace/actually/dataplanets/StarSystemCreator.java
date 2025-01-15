@@ -1,16 +1,32 @@
 package ace.actually.dataplanets;
 
+import com.gregtechceu.gtceu.GTCEu;
+import com.gregtechceu.gtceu.api.GTValues;
+import com.gregtechceu.gtceu.api.block.MaterialBlock;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
+import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
+import com.gregtechceu.gtceu.api.data.worldgen.GTOreDefinition;
+import com.gregtechceu.gtceu.common.data.GTBlocks;
+import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
+import com.gregtechceu.gtceu.common.data.GTMaterials;
+import com.gregtechceu.gtceu.data.loader.GTOreLoader;
+import com.gregtechceu.gtceu.integration.xei.widgets.GTOreByProduct;
+import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import org.antlr.v4.runtime.atn.SemanticContext;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class StarSystemCreator {
@@ -269,6 +285,7 @@ public class StarSystemCreator {
                             shouldGenDripstone(random)+
                             genLakes(planetData,uuid,random)+
                             genRocks(planetData,uuid,random)+
+                            genOre(random,uuid)+
                     "    ]\n" +
                     "  ]\n" +
                     "}");
@@ -285,6 +302,19 @@ public class StarSystemCreator {
                 alsoMakeGrass = alsoMakeGrass();
             }
 
+            String oreBase = planetData.getString("generalBlock");
+            if(oreBase.contains("mart"))
+            {
+                oreBase="mars";
+            }
+            if(oreBase.contains("venus"))
+            {
+                oreBase="venus";
+            }
+            if(oreBase.contains("mercury"))
+            {
+                oreBase="mercury";
+            }
 
 
 
@@ -393,7 +423,7 @@ public class StarSystemCreator {
                     "  \"horizon_angle\": 0,\n" +
                     "  \"sky_objects\": [\n" +
                     "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
+                    "      \"texture\": \"gcyr:textures/sky/mercury.png\",\n" +
                     "      \"blending\": true,\n" +
                     "      \"render_type\": \"dynamic\",\n" +
                     "      \"scale\": SZ,\n".replace("SZ",""+(planetData.getInt("solarPower")+2)) +
@@ -404,7 +434,7 @@ public class StarSystemCreator {
                     "      ]\n" +
                     "    },\n" +
                     "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/mercury.png\",\n" +
+                    "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
                     "      \"blending\": true,\n" +
                     "      \"render_type\": \"static\",\n" +
                     "      \"scale\": 15.0,\n" +
@@ -461,6 +491,75 @@ public class StarSystemCreator {
 
 
     }
+
+    private static String genOre(RandomSource random,String uuid)
+    {
+        List<Material> ORES = GTMaterialBlocks.MATERIAL_BLOCKS.row(TagPrefix.ore).keySet().stream().toList();
+        Material oreMat = ORES.get(random.nextInt(ORES.size()));
+        BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();
+        ResourceLocation orerl = BuiltInRegistries.BLOCK.getKey(oreState.getBlock());
+        String ore = orerl.toString();
+
+        List<String> configured_ore = List.of("{\n" +
+                "  \"type\": \"minecraft:ore\",\n" +
+                "  \"config\": {\n" +
+                "    \"discard_chance_on_air_exposure\": 0,\n" +
+                "    \"size\": 10,\n" +
+                "    \"targets\": [\n" +
+                "      {\n" +
+                "        \"state\": {\n" +
+                "          \"Name\": \"RL\"\n".replace("RL",ore) +
+                "        },\n" +
+                "        \"target\": {\n" +
+                "          \"predicate_type\": \"minecraft:tag_match\",\n" +
+                "          \"tag\": \"minecraft:dirt\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}");
+
+        String reform = ore.replace(":","_");
+        List<String> placed_ore = List.of("{\n" +
+                "  \"feature\": \"dataplanets:ORE\",\n".replace("ORE",reform) +
+                "  \"placement\": [\n" +
+                "    {\n" +
+                "      \"type\": \"minecraft:count\",\n" +
+                "      \"count\": V\n".replace("V",""+random.nextInt(4,32)) +
+                "    },\n" +
+                "    {\n" +
+                "      \"type\": \"minecraft:in_square\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"type\": \"minecraft:height_range\",\n" +
+                "      \"height\": {\n" +
+                "        \"type\": \"minecraft:trapezoid\",\n" +
+                "        \"max_inclusive\": {\n" +
+                "          \"absolute\": 112\n" +
+                "        },\n" +
+                "        \"min_inclusive\": {\n" +
+                "          \"absolute\": -16\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"type\": \"minecraft:biome\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}");
+
+
+        try {
+            FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+reform+".json"),placed_ore);
+            FileUtils.writeLines(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+reform+".json"),configured_ore);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ",\""+"dataplanets:ORE\"".replace("ORE",reform);
+    }
+
+
 
     private static String shouldGenDripstone(RandomSource source)
     {
