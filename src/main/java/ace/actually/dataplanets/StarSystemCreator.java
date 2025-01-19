@@ -285,7 +285,7 @@ public class StarSystemCreator {
                             shouldGenDripstone(random)+
                             genLakes(planetData,uuid,random)+
                             genRocks(planetData,uuid,random)+
-                            genOre(random,uuid)+
+                            genOre(random,uuid,planetData)+
                     "    ]\n" +
                     "  ]\n" +
                     "}");
@@ -302,19 +302,7 @@ public class StarSystemCreator {
                 alsoMakeGrass = alsoMakeGrass();
             }
 
-            String oreBase = planetData.getString("generalBlock");
-            if(oreBase.contains("mart"))
-            {
-                oreBase="mars";
-            }
-            if(oreBase.contains("venus"))
-            {
-                oreBase="venus";
-            }
-            if(oreBase.contains("mercury"))
-            {
-                oreBase="mercury";
-            }
+
 
 
 
@@ -492,13 +480,28 @@ public class StarSystemCreator {
 
     }
 
-    private static String genOre(RandomSource random,String uuid)
+    private static String genOre(RandomSource random,String uuid,CompoundTag planetData)
     {
+
+        String oreBase = planetData.getString("generalBlock");
+        if(oreBase.contains("mart"))
+        {
+            oreBase="mars";
+        }
+        if(oreBase.contains("venus"))
+        {
+            oreBase="venus";
+        }
+        if(oreBase.contains("mercury"))
+        {
+            oreBase="mercury";
+        }
+
         List<Material> ORES = GTMaterialBlocks.MATERIAL_BLOCKS.row(TagPrefix.ore).keySet().stream().toList();
         Material oreMat = ORES.get(random.nextInt(ORES.size()));
         BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();
         ResourceLocation orerl = BuiltInRegistries.BLOCK.getKey(oreState.getBlock());
-        String ore = orerl.toString();
+        String ore = orerl.toString().replace(":",":"+oreBase+"_");
 
         List<String> configured_ore = List.of("{\n" +
                 "  \"type\": \"minecraft:ore\",\n" +

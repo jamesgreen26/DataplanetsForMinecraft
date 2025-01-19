@@ -56,6 +56,7 @@ public class DPMachines {
             .rotationState(RotationState.NON_Y_AXIS)
             .appearanceBlock(GTBlocks.CASING_STAINLESS_CLEAN)
             .tier(GTValues.EV)
+            .alwaysTryModifyRecipe(true)
             .pattern((definition) -> FactoryBlockPattern.start()
                     .aisle("B         B","B         B","B         B","B         B","B         B","B         B","KKKKKKKKKKK","KKKKKKKKKKK","B         B","B         B","B         B")
                     .aisle("           ","           ","           ","           "," KKKKKKKKK "," KKKKKKKKK ","K         K","KZZZZZZZZZK","           ","           ","           ")

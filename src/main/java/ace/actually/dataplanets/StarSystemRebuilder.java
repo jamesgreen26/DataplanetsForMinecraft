@@ -1,25 +1,6 @@
 package ace.actually.dataplanets;
 
-import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeGenerationSettings;
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -29,57 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class StarSystemRebuilder {
-    private static ResourceKey<Biome> planetDataToBiome(MinecraftServer server, CompoundTag planetData)
-    {
-        RegistryAccess.Frozen registryAccess = server.registryAccess();
-
-        Registry<Biome> biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
-
-        Registry<ConfiguredWorldCarver<?>> carversRegistry = server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER);
-        Holder.Reference<ConfiguredWorldCarver<?>> canyon = carversRegistry.getHolderOrThrow(Carvers.CANYON);
-        Holder.Reference<ConfiguredWorldCarver<?>> cave = carversRegistry.getHolderOrThrow(Carvers.CAVE);
-        Holder.Reference<ConfiguredWorldCarver<?>> cave_extra = carversRegistry.getHolderOrThrow(Carvers.CAVE_EXTRA_UNDERGROUND);
-
-        Registry<PlacedFeature> placedFeatureRegistry = server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
-        Holder.Reference<PlacedFeature> dripstone = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.tryParse("large_dripstone"))).get();
-        Holder.Reference<PlacedFeature> dripstone_cluster = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE,ResourceLocation.tryParse("dripstone_cluster"))).get();
-        Holder.Reference<PlacedFeature> pointed_dripstone = placedFeatureRegistry.getHolder(ResourceKey.create(Registries.PLACED_FEATURE,ResourceLocation.tryParse("pointed_dripstone"))).get();
-
-        Biome biome = new Biome.BiomeBuilder()
-                .downfall(0)
-                .temperature(0.93f)
-                .hasPrecipitation(false)
-                .specialEffects(new BiomeSpecialEffects.Builder()
-                        .skyColor(planetData.getInt("skyColour"))
-                        .fogColor(planetData.getInt("fogColour"))
-                        .waterColor(planetData.getInt("waterColour"))
-                        .waterFogColor(planetData.getInt("waterFogColour"))
-                        .grassColorOverride(planetData.getInt("grassColour"))
-                        .foliageColorOverride(planetData.getInt("foliage")).build())
-                .mobSpawnSettings(new MobSpawnSettings.Builder().build())
-                .generationSettings(new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.EMPTY)
-                        .addCarver(GenerationStep.Carving.AIR,canyon)
-                        .addCarver(GenerationStep.Carving.AIR,cave)
-                        .addCarver(GenerationStep.Carving.AIR,cave_extra)
-                        .addFeature(0,dripstone)
-                        .addFeature(0,dripstone_cluster)
-                        .addFeature(0,pointed_dripstone).build()).build();
-
-
-
-        ResourceKey<Biome> biomeKey = ResourceKey.create(biomeRegistry.key(), ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_terrain"));
-
-
-        ((IUnfreezableRegistry) biomeRegistry).setRegFrozen(false);
-        ((MappedRegistry<Biome>) biomeRegistry).register(
-                biomeKey,
-                biome,
-                Lifecycle.experimental() // use built-in registration info for now
-        );
-        ((IUnfreezableRegistry) biomeRegistry).setRegFrozen(true);
-
-        return biomeKey;
-    }
 
     public static void buildRPFromData(CompoundTag tagIn)
     {
