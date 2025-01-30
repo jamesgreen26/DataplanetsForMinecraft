@@ -29,7 +29,5 @@ public class DPRecipes {
                 .inputItems(Items.WRITABLE_BOOK)
                 .outputItems(DPItems.THEORY_RADIO)
                 .save(provider);
-
-
     }
 }
