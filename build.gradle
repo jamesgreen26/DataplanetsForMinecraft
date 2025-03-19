@@ -1,4 +1,21 @@
 
+buildscript {
+    repositories {
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
+
+    }
+}
+
 
 plugins {
     id 'eclipse'
@@ -9,6 +26,11 @@ plugins {
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 version = mod_version
 group = mod_group_id
@@ -123,19 +145,7 @@ minecraft {
 
 repositories {
     mavenLocal()
-    repositories {
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "Modrinth"
-                    url = "https://api.modrinth.com/maven"
-                }
-            }
-            filter {
-                includeGroup "maven.modrinth"
-            }
-        }
-    }
+
     maven {
         name = 'GTCEu Maven'
         url = 'https://maven.gtceu.com'
@@ -143,42 +153,62 @@ repositories {
             includeGroup 'com.gregtechceu.gtceu'
         }
     }
-    maven { url = "https://maven.firstdarkdev.xyz/snapshots" }
+    // mavens for Forge-exclusives
+    maven { url = "https://api.modrinth.com/maven" } // Jade
+    maven { url = "https://maven.theillusivec4.top/" } // Curios
+    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu, EMI
+    maven { // Create Forge and Registrate Forge
+        url = "https://maven.tterrag.com/"
+        content {
+            includeGroup("com.tterrag.registrate")
+            includeGroup("com.simibubi.create")
+        }
+    }
+    maven { url = "https://maven.parchmentmc.org" } // Parchment mappings
+    maven { url = "https://maven.quiltmc.org/repository/release" } // Quilt Mappings
+    maven { // TOP
+        url "https://maven.k-4u.nl"
+    }
+    maven {
+        // saps.dev Maven (KubeJS and Rhino)
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
+    mavenLocal()
+    mavenCentral()
+    maven { url = "https://maven.shedaniel.me/" } // Cloth Config, REI
     maven {
         url "https://cursemaven.com"
         content {
             includeGroup "curse.maven"
         }
-    }
+    } // Curse Forge File
     maven {
-        url = "https://maven.tterrag.com/"
-        content {
-            includeGroup("com.tterrag.registrate")
-        }
-    }
-    maven { url = "https://maven.ithundxr.dev/snapshots" }
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    } // JEI
+    maven { url 'https://jitpack.io' } // MixinExtras
     maven {
-        name "Modmaven"
-        url "https://modmaven.dev/"
-        // For Gradle 5.1 and above, limit it to just AE2
-        content {
-            includeGroup 'appeng'
-        }
-    }
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    } // JEI mirror, AE2
+    maven { url = "https://maven.parchmentmc.org" } // Parchment mappings
+    maven { url = "https://maven.quiltmc.org/repository/release/" } // Quilt Mappings
+    maven { url = "https://maven.firstdarkdev.xyz/snapshots" } // LDLib
     maven {
-        name = 'Kotlin for Forge'
-        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        name = "redlance"
+        url = "https://repo.constructlegacy.ru/public"
     }
-    maven {
-        name = "TerraformersMC"
-        url = "https://maven.terraformersmc.com/"
+
+    maven
+    {
+        url = "https://files.minecraftforge.net/maven/"
     }
-    maven {
-        name = "mixin"
-        url = "https://repo.spongepowered.org/repository/maven-public/"
-    }
-    maven { url = "https://maven.architectury.dev" }
-    maven { url = "https://maven.saps.dev/minecraft"; content { includeGroup "dev.latvian.mods" } }
+
+
 }
 
 jarJar.enable()
@@ -214,6 +244,10 @@ dependencies {
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.0"))
+    api("io.github.llamalad7:mixinextras-forge:0.2.0")
+    // apply a newer mixin AP to fix an issue with building the Lithium mixins
+    implementation(annotationProcessor("org.spongepowered:mixin:0.8.5:processor"))
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
@@ -290,10 +324,4 @@ reobf {
 }
 
 tasks.jarJar.finalizedBy('reobfJarJar')
-
-mixin {
-    add sourceSets.main, "mixins.dataplanets.refmap.json"
-
-    config "dataplanets.mixins.json"
-}
 

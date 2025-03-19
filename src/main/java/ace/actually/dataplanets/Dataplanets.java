@@ -20,6 +20,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
+import org.spongepowered.asm.mixin.Mixins;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -51,7 +52,7 @@ public class Dataplanets
         bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
         ;
         bus.addGenericListener(MachineDefinition.class, ModEvents::registerMachines);
-
+        Mixins.addConfiguration("dataplanets.mixins.json");
 
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call

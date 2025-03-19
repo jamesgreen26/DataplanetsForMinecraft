@@ -1,5 +1,7 @@
 package ace.actually.dataplanets.items;
 
+import ace.actually.dataplanets.Dataplanets;
+import ace.actually.dataplanets.StarSystemCreator;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
 import argent_matter.gcyr.common.data.GCYRBiomes;
 import argent_matter.gcyr.common.data.GCYRBlocks;
@@ -107,7 +109,7 @@ public class TelescopeItem extends Item {
         {
             if(pPlayer.isCrouching())
             {
-                //makeDynamicWorld(pLevel.getServer(), GCYRBiomes.MOON);
+                makeDynamicWorld(pLevel.getServer(), pLevel.getServer().getCommandStorage().get(StarSystemCreator.SYSTEM_DATA).getCompound("sz633").getCompound("sz633d"));
             }
             else
             {
@@ -189,6 +191,7 @@ public class TelescopeItem extends Item {
                 Lifecycle.experimental() // use built-in registration info for now
         );
         ((IUnfreezableRegistry) levelStemRegistry).setRegFrozen(true);
+
     }
 
     @Override
