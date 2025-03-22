@@ -1,22 +1,4 @@
 
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-
-    }
-}
-
-
 plugins {
     id 'eclipse'
     id 'idea'
@@ -26,11 +8,6 @@ plugins {
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 version = mod_version
 group = mod_group_id
@@ -203,11 +180,6 @@ repositories {
         url = "https://repo.constructlegacy.ru/public"
     }
 
-    maven
-    {
-        url = "https://files.minecraftforge.net/maven/"
-    }
-
 
 }
 
@@ -313,6 +285,12 @@ publishing {
             url "file://${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+mixin {
+    add sourceSets.main, "mixins.dataplanets.refmap.json"
+
+    config "dataplanets.mixins.json"
 }
 
 tasks.withType(JavaCompile).configureEach {

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+//TODO: remove all datapack file writing as it's no longer necessary, save the CompoundTag to .dat file.
 public class StarSystemCreator {
 
     public static String DATALOC;

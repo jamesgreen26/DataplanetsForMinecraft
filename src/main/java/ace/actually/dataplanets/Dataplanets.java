@@ -52,7 +52,7 @@ public class Dataplanets
         bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
         ;
         bus.addGenericListener(MachineDefinition.class, ModEvents::registerMachines);
-        Mixins.addConfiguration("dataplanets.mixins.json");
+        //Mixins.addConfiguration("dataplanets.mixins.json");
 
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
