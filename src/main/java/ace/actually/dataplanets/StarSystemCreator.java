@@ -5,14 +5,20 @@ import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +30,7 @@ public class StarSystemCreator {
     public static List<Material> FLUIDABLE = null;
     public static final ResourceLocation SYSTEM_DATA = ResourceLocation.tryBuild("dataplanets","system_data");
 
-    public static void makeSystem(MinecraftServer server)
+    public static void makeSystem()
     {
 
 
@@ -48,7 +54,7 @@ public class StarSystemCreator {
 
 
 
-            inventSystem(server,uuid);
+            inventSystem(uuid);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -60,10 +66,10 @@ public class StarSystemCreator {
     private static final String[] WEIGHTED_BOOLEANS = new String[]{"false","false","false","true"};
     private static final String[] REVERSED_WEIGHTED_BOOLEANS = new String[]{"true","true","true","false"};
     private static final String[] SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
-    private static void inventSystem(MinecraftServer server,String uuid)
+    private static void inventSystem(String uuid)
     {
-        RandomSource random = server.overworld().random;
-        String systemName = CODE[random.nextInt(CODE.length)]+CODE[server.overworld().random.nextInt(CODE.length)]+server.overworld().random.nextInt(1000);
+        RandomSource random = RandomSource.create();
+        String systemName = CODE[random.nextInt(CODE.length)]+CODE[random.nextInt(CODE.length)]+random.nextInt(1000);
         int rocketTier = random.nextInt(3)+1;
 
 
@@ -457,16 +463,45 @@ public class StarSystemCreator {
             }
             systemData.put(planetName,planetData);
         }
-        CompoundTag tag = server.getCommandStorage().get(SYSTEM_DATA);
+        CompoundTag tag = getDynamicDataOrNew();
         tag.put(systemName,systemData);
-        server.getCommandStorage().set(SYSTEM_DATA,tag);
+        writeToDynamic(tag);
         try {
             writeLinesCond(new File(RECLOC+"pack"+uuid+"\\assets\\dataplanets\\lang\\en_us.json"),List.of(langFile.substring(0,langFile.length()-1)+"}"));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
 
+    }
+
+    public static CompoundTag getDynamicDataOrNew()
+    {
+        CompoundTag tag;
+        File storage = new File("./dataplanets_dynamic_data.dat");
+        if(storage.exists())
+        {
+            try {
+                tag = NbtIo.readCompressed(new File("./dataplanets_dynamic_data.dat"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else
+        {
+            tag = new CompoundTag();
+        }
+        return tag;
+    }
+    private static void writeToDynamic(CompoundTag tag)
+    {
+        File storage = new File("./dataplanets_dynamic_data.dat");
+        try {
+            NbtIo.writeCompressed(tag,storage);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String genOre(RandomSource random,String uuid,CompoundTag planetData)
@@ -490,7 +525,19 @@ public class StarSystemCreator {
         Material oreMat = ORES.get(random.nextInt(ORES.size()));
         BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();
         ResourceLocation orerl = BuiltInRegistries.BLOCK.getKey(oreState.getBlock());
-        String ore = orerl.toString().replace(":",":"+oreBase+"_");
+        String ore = orerl.toString();
+        ListTag ores;
+        if(planetData.contains("planet_ores"))
+        {
+            ores = (ListTag) planetData.get("planet_ores");
+        }
+        else
+        {
+            ores = new ListTag();
+        }
+        ores.add(StringTag.valueOf(ore));
+        planetData.put("planet_ores",ores);
+
 
         List<String> configured_ore = List.of("{\n" +
                 "  \"type\": \"minecraft:ore\",\n" +
@@ -696,6 +743,7 @@ public class StarSystemCreator {
             String fluidName;
 
             //these first two conditions should only trigger if a planet is really really hot or really really cold.
+            //and they should only trigger at all if we are in a gamestate where we have no other fluids
             if(materials.isEmpty() && planetData.getInt("temperature")<301)
             {
                 matName = "ice";
@@ -713,6 +761,16 @@ public class StarSystemCreator {
                 matName = material.getName();
             }
 
+            ListTag lakes;
+            if(planetData.contains("lakeFluids"))
+            {
+                lakes = (ListTag) planetData.get("lakeFluids");
+            }
+            else
+            {
+                lakes = new ListTag();
+            }
+            lakes.add(StringTag.valueOf(fluidName));
 
 
             List<String> lake_placed_feature = List.of("{\n" +

@@ -1,6 +1,7 @@
 package ace.actually.dataplanets.items;
 
 import ace.actually.dataplanets.Dataplanets;
+import ace.actually.dataplanets.DynamicSystems;
 import ace.actually.dataplanets.StarSystemCreator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,9 +43,8 @@ public class TheoryItem extends Item {
                 {
                     MinecraftServer server = world.getServer();
 
-                    StarSystemCreator.makeSystem(server);
+                    StarSystemCreator.makeSystem();
 
-                    //server.getPackRepository().reload();
                     didPass=true;
                 }
             }

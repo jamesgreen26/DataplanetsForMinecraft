@@ -20,7 +20,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
-import org.spongepowered.asm.mixin.Mixins;
+
+import java.util.UUID;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -32,6 +33,8 @@ public class Dataplanets
     public static final String MODID = "dataplanets";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final UUID LOW_GRAVITY = UUID.fromString("662A6B8D-DA3E-4C1C-1112-96EA6097278D");
 
 
     public static final ResourceLocation DATA_STORAGE  = ResourceLocation.tryBuild("dataplanets","data_storage");

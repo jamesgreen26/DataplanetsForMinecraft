@@ -3,6 +3,10 @@ package ace.actually.dataplanets.mixin;
 import ace.actually.dataplanets.DynamicSystems;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,7 +19,7 @@ public abstract class MinecraftServerMixin {
     @Inject(method = "saveAllChunks", at = @At("TAIL"))
     private void checkKey(boolean p_129886_, boolean p_129887_, boolean p_129888_, CallbackInfoReturnable<Boolean> cir)
     {
-        System.out.println("Unlocking dynamic generation...");
-        DynamicSystems.frozenOnce=false;
+        //System.out.println("Unlocking dynamic generation...");
+        DynamicSystems.frozeTimes=0;
     }
 }

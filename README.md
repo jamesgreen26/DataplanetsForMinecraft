@@ -1,5 +1,5 @@
 # Dataplanets
-A mod that uses slightly cursed datapack generation (right now) to add infinite planets to GCYR (right now)
+A mod that uses slightly cursed ~~datapack generation (right now)~~ registry manipulation to add infinite planets to GCYR (right now)
 
 # Notice
 - This mod was originally made for 1.21 as originally posted on the GTCEU discord

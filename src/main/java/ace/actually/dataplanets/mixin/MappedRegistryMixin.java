@@ -1,8 +1,10 @@
 package ace.actually.dataplanets.mixin;
 
 import ace.actually.dataplanets.DynamicSystems;
+import ace.actually.dataplanets.StarSystemCreator;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
 import net.minecraft.core.*;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -11,8 +13,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.internal.ForgeBindings;
@@ -58,6 +64,12 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
     public void preFreeze(CallbackInfoReturnable<Registry<Object>> cir)
     {
         boolean shouldMake = false;
+        if(key.location().getPath().equals("dimension_type") && key.location().getNamespace().equals("minecraft"))
+        {
+
+            DynamicSystems.DIMENSION_TYPE = (Registry<DimensionType>) this;
+            shouldMake=true;
+        }
         if(key.location().getPath().equals("worldgen/biome") && key.location().getNamespace().equals("minecraft"))
         {
 
@@ -76,38 +88,28 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
             DynamicSystems.PLACED_FEATURES = (Registry<PlacedFeature>) this;
             shouldMake=true;
         }
-        if(shouldMake && DynamicSystems.allRegistriesFrozen() && !DynamicSystems.frozenOnce)
+        if(key.location().getPath().equals("worldgen/configured_feature") && key.location().getNamespace().equals("minecraft"))
         {
-            DynamicSystems.frozenOnce=true;
-            try {
-                System.out.println(new File("./").getAbsolutePath());
-                //TODO: use a generic .dat file in the default directory rather than a specific world
-                CompoundTag tag = NbtIo.readCompressed(new File(".\\saves\\Dynamic Worlds Test\\data\\command_storage_dataplanets.dat"));
-                CompoundTag systemData = tag.getCompound("data").getCompound("contents").getCompound("system_data");
-                for(String system: systemData.getAllKeys())
-                {
-                    if(systemData.getTagType(system)== Tag.TAG_COMPOUND)
-                    {
-                        CompoundTag specificSystem = systemData.getCompound(system);
 
-                        for(String planet: specificSystem.getAllKeys())
-                        {
-                            if(specificSystem.getTagType(planet)== Tag.TAG_COMPOUND)
-                            {
-                                CompoundTag specificPlanet = specificSystem.getCompound(planet);
-                                //DynamicSystems.genCounter++;
-                                DynamicSystems.planetDataToBiome(specificPlanet);
-                                System.out.println("Created dynamic biome: "+specificPlanet.getString("name")+" at "+nextId);
+            DynamicSystems.CONFIGURED_FEATURES = (Registry<ConfiguredFeature<?, ?>>) this;
+            shouldMake=true;
+        }
+        if(key.location().getPath().equals("worldgen/noise") && key.location().getNamespace().equals("minecraft"))
+        {
 
-                            }
-                        }
-
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
+            DynamicSystems.NOISE = (Registry<NormalNoise.NoiseParameters>) this;
+            shouldMake=true;
+        }
+        if(key.location().getPath().equals("dimension") && key.location().getNamespace().equals("minecraft"))
+        {
+            DynamicSystems.LEVEL_STEMS = (Registry<LevelStem>) this;
+            shouldMake=true;
+        }
+        if(shouldMake)
+        {
+            DynamicSystems.frozeTimes++;
+            //System.out.println("frozen "+DynamicSystems.frozeTimes);
+            DynamicSystems.loadDynamicResources();
         }
 
     }
