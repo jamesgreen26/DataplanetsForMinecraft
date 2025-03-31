@@ -1,9 +1,6 @@
 package ace.actually.dataplanets.items;
 
-import ace.actually.dataplanets.DynamicSystems;
-import ace.actually.dataplanets.StarSystemCreator;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import ace.actually.dataplanets.space.DynamicSystems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -27,27 +24,7 @@ public class TelescopeItem extends Item {
         {
             if(pPlayer.isCrouching())
             {
-                CompoundTag systems = StarSystemCreator.getDynamicDataOrNew();
-                for(String systemId: systems.getAllKeys())
-                {
-                    if(systems.getTagType(systemId)== Tag.TAG_COMPOUND)
-                    {
-                        CompoundTag systemData = systems.getCompound(systemId);
-                        for(String planetId: systemData.getAllKeys())
-                        {
-
-                            if(systemData.getTagType(planetId)== Tag.TAG_COMPOUND)
-                            {
-                                System.out.println("creating planet: "+planetId);
-                                DynamicSystems.makeDynamicWorld(pLevel.getServer(),systemData.getCompound(planetId));
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                //StarSystemCreator.makeDynamicBiome(pLevel.getServer());
+                DynamicSystems.onGenSetup(pLevel.getServer());
             }
 
         }

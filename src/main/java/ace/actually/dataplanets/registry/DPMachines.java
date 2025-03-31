@@ -1,4 +1,4 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.registry;
 
 import ace.actually.dataplanets.machine.ObservatoryMachine;
 import com.gregtechceu.gtceu.GTCEu;

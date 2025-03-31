@@ -1,4 +1,4 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.registry;
 
 import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper;
 import net.minecraft.data.recipes.FinishedRecipe;

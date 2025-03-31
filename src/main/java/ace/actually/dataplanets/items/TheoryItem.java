@@ -1,25 +1,16 @@
 package ace.actually.dataplanets.items;
 
-import ace.actually.dataplanets.Dataplanets;
-import ace.actually.dataplanets.DynamicSystems;
-import ace.actually.dataplanets.StarSystemCreator;
+import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,31 +32,17 @@ public class TheoryItem extends Item {
             {
                 if(world.random.nextInt(MAX_LEVEL)==0)
                 {
-                    MinecraftServer server = world.getServer();
-
                     StarSystemCreator.makeSystem();
-
                     didPass=true;
                 }
             }
 
             if(didPass)
             {
-                CompoundTag tag = world.getServer().getCommandStorage().get(Dataplanets.DATA_STORAGE);
-                tag.put("reloadVotes",new ListTag());
-                world.getServer().getCommandStorage().set(Dataplanets.DATA_STORAGE,tag);
 
-                player.sendSystemMessage(Component.empty().append("You theory was successfully proven, new systems are confirmed to exist! The scientific community have been notified!").copy()
-                        .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Component.empty().append("You will not be able to see your system in the menu or visit it, until the world is restarted")))));
-
-                /**world.getServer().getAllLevels()
-                        .forEach(w->w.getPlayers(LivingEntity::attackable)
-                        .forEach(p->p.sendSystemMessage(Component.empty()
-                                .append("A player has discovered a new star system, click here to add your vote to reload datapacks!")
-                                .copy()
-                                .withStyle(Style.EMPTY.withColor(ChatFormatting.GREEN)
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Component.empty().append("/dataplanets reload")))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/dataplanets reload"))))));**/
+                player.sendSystemMessage(Component.empty()
+                        .append("You theory was successfully proven, new systems are confirmed to exist! The scientific community have been notified!").copy()
+                        .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)));
 
 
             }

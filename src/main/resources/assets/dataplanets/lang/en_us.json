@@ -4,7 +4,9 @@
   "item.dataplanets.theory_radio": "Speculative Radio Theory (I)",
   "item.dataplanets.theory_visible": "Speculative Visible Theory (I)",
   "item.dataplanets.theory2": "Research Theory (II)",
+  "item.dataplanets.field_research": "Field Research",
   "block.dataplanets.observatory": "Visible Light Observatory",
+  "block.dataplanets.research_station": "Research Computer",
   "block.dataplanets.radio_telescope": "Radio Telescope",
   "recipe_type.dataplanets.observatory_recipe_type": "Visible Theory Discovery",
   "recipe_type.dataplanets.radio_recipe_type": "Radio Theory Discovery"

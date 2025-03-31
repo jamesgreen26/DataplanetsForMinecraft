@@ -1,6 +1,21 @@
 # Dataplanets
 A mod that uses slightly cursed ~~datapack generation (right now)~~ registry manipulation to add infinite planets to GCYR (right now)
 
+# The Plan
+- [x] Rocky terrestrial planets
+- [x] (Rocky) sea planets
+-  [ ] Research System
+- [ ] Space navigation
+  - [ ] Rockets
+  -  [ ] Starships
+- [ ] Gas Giants
+- [ ] Creatures
+  - [ ] Sea Creatures
+  - [ ] Terrestrial Creatures
+- [ ] Space stations 
+- [ ] Story Events
+- [ ] Space factions
+
 # Notice
 - This mod was originally made for 1.21 as originally posted on the GTCEU discord
 - Originally the plan was to make an independent mod that adds universal content to every space mod, this is still the plan for this project

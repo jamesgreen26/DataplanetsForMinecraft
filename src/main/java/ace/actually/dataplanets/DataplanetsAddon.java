@@ -1,5 +1,7 @@
 package ace.actually.dataplanets;
 
+import ace.actually.dataplanets.registry.DPRecipes;
+import ace.actually.dataplanets.registry.Reg;
 import com.gregtechceu.gtceu.api.addon.GTAddon;
 import com.gregtechceu.gtceu.api.addon.IGTAddon;
 import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate;

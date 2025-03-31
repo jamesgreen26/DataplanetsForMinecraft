@@ -1,6 +1,5 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.registry;
 
-import argent_matter.gcyr.api.registries.GCYRRegistries;
 import com.gregtechceu.gtceu.common.data.GTCreativeModeTabs;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import net.minecraft.network.chat.Component;

@@ -1,5 +1,7 @@
 package ace.actually.dataplanets;
 
+import ace.actually.dataplanets.registry.*;
+import ace.actually.dataplanets.space.StarSystemCreator;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.data.chemical.material.event.PostMaterialEvent;
@@ -47,6 +49,7 @@ public class Dataplanets
 
         DPTabs.init();
         DPItems.init();
+        DPBlocks.init();
         Reg.REGISTRATE.registerRegistrate();
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -55,7 +58,6 @@ public class Dataplanets
         bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
         ;
         bus.addGenericListener(MachineDefinition.class, ModEvents::registerMachines);
-        //Mixins.addConfiguration("dataplanets.mixins.json");
 
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -93,30 +95,7 @@ public class Dataplanets
                         }))
                 .then(literal("reload")
                         .executes(context -> {
-                            CompoundTag tag = context.getSource().getServer().getCommandStorage().get(DATA_STORAGE);
-                            if(tag.contains("reloadVotes"))
-                            {
-                                ListTag votes = (ListTag) tag.get("reloadVotes");
 
-                                if(votes.size()>(context.getSource().getServer().getPlayerCount()/2))
-                                {
-                                    context.getSource().sendSystemMessage(Component.empty().append("Reload initiated!"));
-                                    CommandSourceStack stack =  context.getSource().getServer().createCommandSourceStack();
-                                    //TODO: how do you run a command in 1.20.1?
-                                    tag.remove("reloadVotes");
-                                    context.getSource().getServer().getCommandStorage().set(DATA_STORAGE,tag);
-
-                                }
-
-                                for (int i = 0; i < votes.size(); i++) {
-                                    if(votes.getString(i).equals(context.getSource().getPlayer().getStringUUID()))
-                                    {
-                                        context.getSource().sendSystemMessage(Component.empty().append("You have already voted!"));
-                                        return 1;
-                                    }
-                                }
-                                votes.add(StringTag.valueOf(context.getSource().getPlayer().getStringUUID()));
-                            }
                             return 1;
                         })));
     }
@@ -138,12 +117,12 @@ public class Dataplanets
         @SubscribeEvent
         public static void postMaterial(PostMaterialEvent event)
         {
-            System.out.println("trying to make fluid blocks...");
+            //System.out.println("trying to make fluid blocks...");
 
             StarSystemCreator.FLUIDABLE = GTCEuAPI.materialManager.getRegistry(GTCEu.MOD_ID).getAllMaterials().stream().filter(a->a.hasFluid()).toList();
             StarSystemCreator.FLUIDABLE.forEach(a->
             {
-                System.out.println("Making a fluid block for "+a.getName()+"!");
+                //System.out.println("Making a fluid block for "+a.getName()+"!");
                 a.getFluidBuilder().block().still();
             });
         }

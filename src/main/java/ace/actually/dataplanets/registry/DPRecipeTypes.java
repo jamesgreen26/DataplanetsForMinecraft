@@ -1,5 +1,6 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.registry;
 
+import ace.actually.dataplanets.Dataplanets;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeSerializer;
@@ -12,7 +13,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.ELECTRIC;

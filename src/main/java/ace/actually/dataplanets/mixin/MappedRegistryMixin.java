@@ -1,17 +1,10 @@
 package ace.actually.dataplanets.mixin;
 
-import ace.actually.dataplanets.DynamicSystems;
-import ace.actually.dataplanets.StarSystemCreator;
+import ace.actually.dataplanets.space.DynamicSystems;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
 import net.minecraft.core.*;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.RegistryLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -19,21 +12,12 @@ import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.internal.ForgeBindings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
 
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin implements IUnfreezableRegistry {

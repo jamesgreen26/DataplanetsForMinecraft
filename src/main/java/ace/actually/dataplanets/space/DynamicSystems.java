@@ -1,24 +1,15 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.space;
 
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
-import argent_matter.gcyr.common.data.GCYRBlocks;
 import com.google.common.collect.ImmutableList;
-import com.gregtechceu.gtceu.api.data.chemical.material.Material;
-import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
-import com.gregtechceu.gtceu.api.data.worldgen.modifier.BiomePlacement;
-import com.gregtechceu.gtceu.common.data.GTConfiguredFeatures;
-import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Carvers;
-import net.minecraft.data.worldgen.SurfaceRuleData;
-import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -43,11 +34,10 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.OreFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.*;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.DerivedLevelData;
@@ -71,6 +61,10 @@ public class DynamicSystems {
     public static Registry<NormalNoise.NoiseParameters> NOISE = null;
     public static int frozeTimes = 0;
 
+    /**
+     * called to load "datapack" resources into a world
+     * used every time apart from the first when you should use onGenSetup instead.
+     */
     public static void loadDynamicResources()
     {
         //TODO: 20 is a somewhat arbitrary number, check this works on a big modpack
@@ -159,10 +153,21 @@ public class DynamicSystems {
 
         builder.addCarver(GenerationStep.Carving.AIR,canyon)
                 .addCarver(GenerationStep.Carving.AIR,cave)
-                .addCarver(GenerationStep.Carving.AIR,cave_extra)
-                .addFeature(0,dripstone)
-                .addFeature(0,dripstone_cluster)
-                .addFeature(0,pointed_dripstone);
+                .addCarver(GenerationStep.Carving.AIR,cave_extra);
+
+        byte[] flavour = planetData.getByteArray("flavour");
+        if(flavour[0]==1)
+        {
+            builder.addFeature(0,dripstone_cluster);
+        }
+        if(flavour[1]==1)
+        {
+            builder.addFeature(0,dripstone);
+        }
+        if(flavour[2]==1)
+        {
+            builder.addFeature(0,pointed_dripstone);
+        }
 
 
         List<ResourceKey<PlacedFeature>> features = makeOres(planetData);
@@ -175,6 +180,12 @@ public class DynamicSystems {
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
         }
+        features = makeRocks(planetData);
+        for(ResourceKey<PlacedFeature> feature: features)
+        {
+            builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
+        }
+
 
 
         return builder;
@@ -187,9 +198,17 @@ public class DynamicSystems {
         if(!DIMENSION_TYPE.containsKey(dimKey))
         {
             ResourceLocation effects;
-            if(planetData.getString("hasAtmosphere").equals("true"))
+            if(planetData.getBoolean("hasAtmosphere"))
             {
-                effects=ResourceLocation.fromNamespaceAndPath("minecraft","overworld");
+                if(planetData.getBoolean("hasOxygen"))
+                {
+                    effects=ResourceLocation.fromNamespaceAndPath("minecraft","overworld");
+                }
+                else
+                {
+                    effects=ResourceLocation.fromNamespaceAndPath("minecraft","the_nether");
+                }
+
             }
             else
             {
@@ -330,6 +349,67 @@ public class DynamicSystems {
         return features;
     }
 
+    public static List<ResourceKey<PlacedFeature>> makeRocks(CompoundTag planetData)
+    {
+        List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
+        if(planetData.contains("rock_blocks"))
+        {
+            ListTag rocks = (ListTag) planetData.get("rock_blocks");
+            for (int i = 0; i < rocks.size(); i++) {
+                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_rock_"+i));
+                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_rock_"+i));
+                if(!PLACED_FEATURES.containsKey(placedKey))
+                {
+                    BlockState rock = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(rocks.getString(i))).defaultBlockState();
+
+                    ConfiguredFeature<?,?> feature = new ConfiguredFeature<>(Feature.FOREST_ROCK,new BlockStateConfiguration(rock));
+
+
+                    ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(false);
+                    ((MappedRegistry<ConfiguredFeature<?,?>>) CONFIGURED_FEATURES).register(
+                            configuredKey,
+                            feature,
+                            Lifecycle.stable() // use built-in registration info for now
+                    );
+                    ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(true);
+
+                    List<PlacementModifier> modifiers = new ArrayList<>();
+                    modifiers.add(RarityFilter.onAverageOnceEvery(2));
+                    modifiers.add(InSquarePlacement.spread());
+                    modifiers.add(HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING));
+                    PlacedFeature placedFeature = new PlacedFeature(CONFIGURED_FEATURES.getHolderOrThrow(configuredKey),modifiers);
+
+
+
+                    ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(false);
+                    ((MappedRegistry<PlacedFeature>) PLACED_FEATURES).register(
+                            placedKey,
+                            placedFeature,
+                            Lifecycle.stable() // use built-in registration info for now
+                    );
+                    ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(true);
+                    features.add(placedKey);
+                }
+
+
+
+            }
+        }
+        return features;
+    }
+
+    private static SurfaceRules.RuleSource planetarySurface(boolean hasLife)
+    {
+        ImmutableList.Builder<SurfaceRules.RuleSource> builder = ImmutableList.builder();
+        builder.add(SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), SurfaceRules.state(Blocks.BEDROCK.defaultBlockState())));
+        if(hasLife)
+        {
+            builder.add(SurfaceRules.ifTrue(SurfaceRules.waterBlockCheck(0, 0),SurfaceRules.state(Blocks.GRASS_BLOCK.defaultBlockState())));
+        }
+
+        return SurfaceRules.sequence(builder.build().toArray(SurfaceRules.RuleSource[]::new));
+    }
+
 
 
     public static LevelStem makeLevelStem(CompoundTag planetData)
@@ -342,7 +422,7 @@ public class DynamicSystems {
             NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
                     NoiseSettings.create(-64, 384, 2, 2),
                     BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState(),
-                    Blocks.AIR.defaultBlockState(),
+                    BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("seaBlock"))).defaultBlockState(),
                     new NoiseRouter(
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0),
@@ -361,7 +441,7 @@ public class DynamicSystems {
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0)),
-                    SurfaceRuleData.overworld(),
+                    planetarySurface(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
                     new OverworldBiomeBuilder().spawnTarget(),
                     63,
                     false,
@@ -385,20 +465,49 @@ public class DynamicSystems {
 
     public static void makeDynamicWorld(MinecraftServer server, CompoundTag planetData)
     {
-
-        ChunkProgressListener listener = server.progressListenerFactory.create(server.getWorldData().getGameRules().getInt(GameRules.RULE_SPAWN_RADIUS));
-
-        ServerLevelData serverleveldata = server.getWorldData().overworldData();
-
-
         ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
-        DerivedLevelData derivedleveldata = new DerivedLevelData(server.getWorldData(), serverleveldata);
-        LevelStem stem = makeLevelStem(planetData);
-        ServerLevel serverlevel1 = new ServerLevel(server, Util.backgroundExecutor(), server.storageSource, derivedleveldata, dimensionKey, stem, listener, server.getWorldData().isDebugWorld(), BiomeManager.obfuscateSeed(server.getWorldData().worldGenOptions().seed()), ImmutableList.of(), false, server.overworld().getRandomSequences());
-        server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
 
-        server.levels.put(dimensionKey, serverlevel1);
-        MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
+        if(!server.levels.containsKey(dimensionKey))
+        {
+            ChunkProgressListener listener = server.progressListenerFactory.create(server.getWorldData().getGameRules().getInt(GameRules.RULE_SPAWN_RADIUS));
+
+            ServerLevelData serverleveldata = server.getWorldData().overworldData();
+
+            DerivedLevelData derivedleveldata = new DerivedLevelData(server.getWorldData(), serverleveldata);
+            LevelStem stem = makeLevelStem(planetData);
+            ServerLevel serverlevel1 = new ServerLevel(server, Util.backgroundExecutor(), server.storageSource, derivedleveldata, dimensionKey, stem, listener, server.getWorldData().isDebugWorld(), BiomeManager.obfuscateSeed(server.getWorldData().worldGenOptions().seed()), ImmutableList.of(), false, server.overworld().getRandomSequences());
+            server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
+
+            server.levels.put(dimensionKey, serverlevel1);
+            MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
+        }
+
+    }
+
+    /**
+     * Called to generate the level/world save data to save to disk
+     * goes through all planets in the data file and creates their save data
+     * @param server
+     */
+    public static void onGenSetup(MinecraftServer server)
+    {
+        CompoundTag systems = StarSystemCreator.getDynamicDataOrNew();
+        for(String systemId: systems.getAllKeys())
+        {
+            if(systems.getTagType(systemId)== Tag.TAG_COMPOUND)
+            {
+                CompoundTag systemData = systems.getCompound(systemId);
+                for(String planetId: systemData.getAllKeys())
+                {
+
+                    if(systemData.getTagType(planetId)== Tag.TAG_COMPOUND)
+                    {
+                        System.out.println("creating planet: "+planetId);
+                        makeDynamicWorld(server,systemData.getCompound(planetId));
+                    }
+                }
+            }
+        }
     }
 
 

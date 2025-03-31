@@ -1,4 +1,4 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.space;
 
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.io.FileUtils;
@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
+//TODO: reimplement this if we are going to continue to use GCYR.
 public class StarSystemRebuilder {
 
     public static void buildRPFromData(CompoundTag tagIn)

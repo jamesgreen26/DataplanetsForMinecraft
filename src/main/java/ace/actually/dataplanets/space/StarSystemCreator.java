@@ -1,4 +1,4 @@
-package ace.actually.dataplanets;
+package ace.actually.dataplanets.space;
 
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
@@ -9,16 +9,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,9 +58,13 @@ public class StarSystemCreator {
 
     }
 
+    private static String truth(boolean truth)
+    {
+        if(truth) return "true";
+        return "false";
+    }
+
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
-    private static final String[] WEIGHTED_BOOLEANS = new String[]{"false","false","false","true"};
-    private static final String[] REVERSED_WEIGHTED_BOOLEANS = new String[]{"true","true","true","false"};
     private static final String[] SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
     private static void inventSystem(String uuid)
     {
@@ -104,14 +104,14 @@ public class StarSystemCreator {
             String planetName = systemName+subname;
             planetData.putString("name",planetName);
             planetData.putFloat("gravity",(float)random.nextInt(1500)/100f);
-            planetData.putString("hasAtmosphere",WEIGHTED_BOOLEANS[random.nextInt(WEIGHTED_BOOLEANS.length)]);
+            planetData.putBoolean("hasAtmosphere",random.nextInt(4)==0);
             planetData.putInt("yearDays",random.nextInt(1,1000));
 
 
             int initalTemperature = random.nextInt(1000);
 
             //a planet with an atmosphere is more likely to have a reasonable temperature
-            if(planetData.getString("hasAtmosphere").equals("true") && initalTemperature<100)
+            if(planetData.getBoolean("hasAtmosphere") && initalTemperature<100)
             {
                 initalTemperature+=100;
             }
@@ -130,10 +130,10 @@ public class StarSystemCreator {
             //nicely, a planet with temperature 401 has a chance of getting 20 (still 1-20 however)
             planetData.putInt("solarPower",random.nextInt((planetData.getInt("temperature")/20)+1));
 
-            planetData.putString("hasOxygen",WEIGHTED_BOOLEANS[random.nextInt(WEIGHTED_BOOLEANS.length)]);
+            planetData.putBoolean("hasOxygen",random.nextInt(4)==0);
 
             String effects;
-            if(planetData.getString("hasAtmosphere").equals("true"))
+            if(planetData.getBoolean("hasAtmosphere"))
             {
                 effects="minecraft:overworld";
             }
@@ -157,11 +157,11 @@ public class StarSystemCreator {
 
                     "\"gravity\": GS,\n".replace("GS",""+planetData.getFloat("gravity")) +
 
-                    "\"has_atmosphere\": BOOL,\n".replace("BOOL", planetData.getString("hasAtmosphere")) +
+                    "\"has_atmosphere\": BOOL,\n".replace("BOOL", truth(planetData.getBoolean("hasAtmosphere"))) +
                     "\"days_in_year\": DAYS,\n".replace("DAYS",""+planetData.getInt("yearDays")) +
                     "\"temperature\": TP,\n".replace("TP",""+planetData.getInt("temperature")) +
                     "\"solar_power\": SP,\n".replace("SP",""+planetData.getInt("solarPower")) +
-                    "\"has_oxygen\": BOOL,\n".replace("BOOL", planetData.getString("hasOxygen")) +
+                    "\"has_oxygen\": BOOL,\n".replace("BOOL", truth(planetData.getBoolean("hasOxygen"))) +
                     "\"button_color\": 893717\n" +
                     "}");
 
@@ -251,6 +251,46 @@ public class StarSystemCreator {
             planetData.putInt("foliageColour",random.nextInt(16777215));
             planetData.putString("generalBlock",SURFACE_BLOCKS[random.nextInt(SURFACE_BLOCKS.length)]);
 
+            if(planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0)
+            {
+                if(planetData.getInt("temperature")<373)
+                {
+                    if(planetData.getInt("temperature")>273)
+                    {
+                        planetData.putString("seaBlock","minecraft:water");
+                    }
+                    else
+                    {
+                        planetData.putString("seaBlock","minecraft:packed_ice");
+                    }
+
+                }
+                else
+                {
+                    planetData.putString("seaBlock","minecraft:air");
+                }
+
+            }
+            else
+            {
+                planetData.putString("seaBlock","minecraft:air");
+            }
+
+            byte[] flavour = new byte[20];
+            for(int z=0; z<flavour.length; z++)
+            {
+                if(random.nextBoolean())
+                {
+                    flavour[z]=1;
+                }
+                else
+                {
+                    flavour[z]=0;
+                }
+            }
+            planetData.putByteArray("flavour",flavour);
+
+
             List<String> biome = List.of("{\n" +
                     "  \"temperature\": TM,\n".replace("TM",""+(float)planetData.getInt("temperature")/500f) +
                     "  \"downfall\": 0,\n" +
@@ -277,7 +317,7 @@ public class StarSystemCreator {
                     "  },\n" +
                     "  \"features\": [\n" +
                     "    [\n" +
-                            shouldGenDripstone(random)+
+                            shouldGenDripstone(planetData,random)+
                             genLakes(planetData,uuid,random)+
                             genRocks(planetData,uuid,random)+
                             genOre(random,uuid,planetData)+
@@ -292,7 +332,7 @@ public class StarSystemCreator {
             planetData.putFloat("nr3", (float) random.nextInt(2000) /1000f);
 
             String alsoMakeGrass  = "";
-            if(planetData.getString("hasAtmosphere").equals("true") && planetData.getString("hasOxygen").equals("true"))
+            if(planetData.getBoolean("hasAtmosphere") && planetData.getBoolean("hasOxygen"))
             {
                 alsoMakeGrass = alsoMakeGrass();
             }
@@ -600,7 +640,7 @@ public class StarSystemCreator {
 
 
 
-    private static String shouldGenDripstone(RandomSource source)
+    private static String shouldGenDripstone(CompoundTag planetData,RandomSource source)
     {
         //\"minecraft:large_dripstone\",\n" +
         //                    "      \"minecraft:dripstone_cluster\",\n" +
@@ -609,6 +649,7 @@ public class StarSystemCreator {
         if(source.nextInt(5)==0)
         {
             stringBuilder.append("\"minecraft:dripstone_cluster\",\n");
+
         }
         if(source.nextInt(5)==0)
         {
@@ -813,6 +854,7 @@ public class StarSystemCreator {
                     "  }\n" +
                     "}");
 
+            planetData.put("lakeFluids",lakes);
             try {
                 writeLinesCond(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+matName+"_lake"+".json"),lake_placed_feature);
                 writeLinesCond(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+matName+"_lake"+".json"),lake_configured_feature);
@@ -830,7 +872,18 @@ public class StarSystemCreator {
     {
         StringBuilder features = new StringBuilder();
         String matName = SURFACE_BLOCKS[randomSource.nextInt(SURFACE_BLOCKS.length)];
-        planetData.putString("rock_block",matName);
+
+        ListTag rocks;
+        if(planetData.contains("rock_blocks"))
+        {
+            rocks = (ListTag) planetData.get("rock_blocks");
+        }
+        else
+        {
+            rocks = new ListTag();
+        }
+        rocks.add(StringTag.valueOf(matName));
+
         String unqualified = matName.split(":")[1];
 
         for (int i = 0; i < 1; i++) {
@@ -865,6 +918,8 @@ public class StarSystemCreator {
                     "  }\n" +
                     "}");
 
+
+            planetData.put("rock_blocks",rocks);
             try {
                 writeLinesCond(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\placed_feature\\"+unqualified+"_rocks"+".json"),placed_feature);
                 writeLinesCond(new File(DATALOC+"pack"+uuid+"\\data\\dataplanets\\worldgen\\configured_feature\\"+unqualified+"_rocks"+".json"),configured_feature);
