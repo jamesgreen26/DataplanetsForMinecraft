@@ -12,11 +12,11 @@ public class DPRecipes {
 
     public static void doRecpies(Consumer<FinishedRecipe> provider)
     {
-        DPRecipeTypes.OBSERVATORY_RECIPE_TYPE.recipeBuilder(ResourceLocation.tryBuild("dataplanets","observetory_recipes"))
+        DPRecipeTypes.OBSERVATORY_RECIPE_TYPE.recipeBuilder(ResourceLocation.tryBuild("dataplanets","observatory_recipes"))
                 .EUt(256)
                 .duration(10000)
                 .inputItems(Items.WRITABLE_BOOK)
-                .outputItems(DPItems.THEORY_VISIBLE)
+                .outputItems(DPItems.RESEARCH)
                 .save(provider);
 
         VanillaRecipeHelper.addShapelessRecipe(provider,ResourceLocation.tryBuild("dataplanets","theorycraft1"),
@@ -27,7 +27,7 @@ public class DPRecipes {
                 .EUt(256)
                 .duration(10000)
                 .inputItems(Items.WRITABLE_BOOK)
-                .outputItems(DPItems.THEORY_RADIO)
+                .outputItems(DPItems.RESEARCH)
                 .save(provider);
     }
 }

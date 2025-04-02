@@ -1,5 +1,6 @@
 package ace.actually.dataplanets.items;
 
+import ace.actually.dataplanets.space.DynamicSystems;
 import ace.actually.dataplanets.space.Planets;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -15,8 +16,16 @@ public class TestItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
-        Planets.sphere(p_41432_,p_41433_.getOnPos(),55);
-        return super.use(p_41432_, p_41433_, p_41434_);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand p_41434_) {
+        if(player.isCrouching())
+        {
+            DynamicSystems.onGenSetup(level.getServer());
+        }
+        else
+        {
+            Planets.sphere(level,player.getOnPos(),55);
+        }
+
+        return super.use(level,player, p_41434_);
     }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "dataplanets:item/field_research"
+    "layer0": "dataplanets:item/research"
   }
 }

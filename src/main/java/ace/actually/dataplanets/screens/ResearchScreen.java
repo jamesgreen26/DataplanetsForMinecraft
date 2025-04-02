@@ -46,4 +46,9 @@ public class ResearchScreen extends Screen {
         int y = height / 7;
         context.blit(TEXTURE,x,y,0,0,247,167);
     }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
 }

@@ -65,6 +65,7 @@ public class StarSystemCreator {
     }
 
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+    //TODO: Abstract, currently uses GCYR
     private static final String[] SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
     private static void inventSystem(String uuid)
     {
@@ -76,6 +77,7 @@ public class StarSystemCreator {
         CompoundTag systemData = new CompoundTag();
         systemData.putString("systemName",systemName);
         systemData.putInt("rocketTier",rocketTier);
+        systemData.putInt("planets",random.nextInt(0,6));
 
         List<String> solar_system = List.of("{\n" +
                 "  \"galaxy\": \"gcyr:milky_way\",\n" +
@@ -98,7 +100,7 @@ public class StarSystemCreator {
         rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2);
         langFile.append(rebuild).append("\",");
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < systemData.getInt("planets"); i++) {
             CompoundTag planetData = new CompoundTag();
             String subname = CODE[i];
             String planetName = systemName+subname;
@@ -249,6 +251,7 @@ public class StarSystemCreator {
             planetData.putInt("waterFogColour",random.nextInt(16777215));
             planetData.putInt("grassColour",random.nextInt(16777215));
             planetData.putInt("foliageColour",random.nextInt(16777215));
+            planetData.putInt("seaLevel",random.nextInt(63,210));
             planetData.putString("generalBlock",SURFACE_BLOCKS[random.nextInt(SURFACE_BLOCKS.length)]);
 
             if(planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0)
@@ -341,7 +344,6 @@ public class StarSystemCreator {
 
 
 
-            //TODO: default fluid could be anything, right?
             List<String> noise_settings = List.of("{\n" +
                     "  \"sea_level\": 63,\n" +
                     "  \"disable_mob_generation\": false,\n" +
@@ -561,6 +563,7 @@ public class StarSystemCreator {
             oreBase="mercury";
         }
 
+        //TODO: Abstract, currently uses GCYR
         List<Material> ORES = GTMaterialBlocks.MATERIAL_BLOCKS.row(TagPrefix.ore).keySet().stream().toList();
         Material oreMat = ORES.get(random.nextInt(ORES.size()));
         BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();

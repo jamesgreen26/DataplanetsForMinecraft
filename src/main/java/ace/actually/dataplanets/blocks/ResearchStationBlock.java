@@ -1,7 +1,7 @@
 package ace.actually.dataplanets.blocks;
 
 import ace.actually.dataplanets.registry.DPBlocks;
-import ace.actually.dataplanets.items.FieldReserchItem;
+import ace.actually.dataplanets.registry.DPItems;
 import ace.actually.dataplanets.screens.ResearchScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -40,19 +41,29 @@ public class ResearchStationBlock extends BaseEntityBlock {
             {
                 ItemStack stack = player.getItemInHand(hand);
 
-                if(stack.hasTag() && stack.getItem() instanceof FieldReserchItem)
+                if(stack.is(DPItems.TEST_ITEM.get()))
                 {
-                    CompoundTag tag = player.getItemInHand(hand).getTag();
-                    boolean v = researchStationBE.addDatapoint(
-                            tag.getString("biome"),
-                            tag.getInt("sectorX"),
-                            tag.getInt("sectorZ"),
-                            tag.getLong("time"));
-                    if(v)
+                    if(stack.hasTag())
                     {
+                        CompoundTag tag = player.getItemInHand(hand).getTag();
+                        boolean v = researchStationBE.addDatapoint(
+                                tag.getString("biome"),
+                                tag.getInt("sectorX"),
+                                tag.getInt("sectorZ"),
+                                tag.getLong("time"));
+                        if(v)
+                        {
+                            player.sendSystemMessage(Component.empty().append("Added research to this station!"));
+                            stack.shrink(1);
+                        }
+                    }
+                    else
+                    {
+                        researchStationBE.addGenericDatapoint();
                         player.sendSystemMessage(Component.empty().append("Added research to this station!"));
                         stack.shrink(1);
                     }
+
                 }
             }
 

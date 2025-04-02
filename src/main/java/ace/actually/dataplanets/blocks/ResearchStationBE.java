@@ -1,5 +1,6 @@
 package ace.actually.dataplanets.blocks;
 
+import ace.actually.dataplanets.registry.DPItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -7,6 +8,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -66,6 +69,14 @@ public class ResearchStationBE extends BlockEntity {
         return false;
     }
 
+    public void addGenericDatapoint()
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("time",level.getGameTime()-50000L);
+        datapoints.add(tag);
+        setChanged();
+    }
+
     @Override
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
@@ -86,8 +97,30 @@ public class ResearchStationBE extends BlockEntity {
         {
             if(be.datapoints==null)be.datapoints=new ListTag();
 
-
             be.progress+=be.datapoints.size();
+            if(be.progress>=1000)
+            {
+                if(level.getBlockEntity(pos.above()) instanceof Container container)
+                {
+                    boolean found = false;
+                    for (int i = 0; i < container.getContainerSize(); i++) {
+                        container.getItem(i);
+                        if(container.getItem(i).isEmpty())
+                        {
+                            container.setItem(i,new ItemStack(DPItems.THEORY_VISIBLE));
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found)
+                    {
+                        be.progress=0;
+                    }
+                }
+            }
+
+
+
             List<CompoundTag> tags = new ArrayList<>();
             for (int i = 0; i < be.datapoints.size(); i++) {
                 CompoundTag tag = be.datapoints.getCompound(i);

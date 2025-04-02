@@ -1,6 +1,9 @@
 package ace.actually.dataplanets.space;
 
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
+import argent_matter.gcyr.common.data.GCYRBiomes;
+import argent_matter.gcyr.common.data.GCYRDimensionTypes;
+import argent_matter.gcyr.common.worldgen.SpaceLevelSource;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.Util;
@@ -37,6 +40,8 @@ import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.*;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -48,6 +53,7 @@ import net.minecraftforge.event.level.LevelEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 //Big props to https://github.com/iPortalTeam/DimLib/blob/1.21/src/main/java/qouteall/dimlib/DynamicDimensionsImpl.java
@@ -79,14 +85,15 @@ public class DynamicSystems {
                 if(tag.getTagType(system)== Tag.TAG_COMPOUND)
                 {
                     CompoundTag specificSystem = tag.getCompound(system);
+                    DynamicSystems.makeStar(specificSystem);
 
                     for(String planet: specificSystem.getAllKeys())
                     {
                         if(specificSystem.getTagType(planet)== Tag.TAG_COMPOUND)
                         {
                             CompoundTag specificPlanet = specificSystem.getCompound(planet);
-
-                            DynamicSystems.makeLevelStem(specificPlanet);
+                            DynamicSystems.makeOrbit(specificPlanet);
+                            DynamicSystems.makePlanet(specificPlanet);
 
                         }
                     }
@@ -108,7 +115,7 @@ public class DynamicSystems {
                 && NOISE!=null;
     }
 
-    public static ResourceKey<Biome> planetDataToBiome(CompoundTag planetData)
+    public static ResourceKey<Biome> makeBiome(CompoundTag planetData)
     {
         ResourceKey<Biome> biomeKey = ResourceKey.create(BIOMES.key(), ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_terrain"));
 
@@ -191,7 +198,7 @@ public class DynamicSystems {
         return builder;
     }
 
-    public static ResourceKey<DimensionType> makeDynamicDimType(CompoundTag planetData)
+    public static ResourceKey<DimensionType> makeDimType(CompoundTag planetData)
     {
         ResourceKey<DimensionType> dimKey = ResourceKey.create(DIMENSION_TYPE.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
 
@@ -398,7 +405,7 @@ public class DynamicSystems {
         return features;
     }
 
-    private static SurfaceRules.RuleSource planetarySurface(boolean hasLife)
+    private static SurfaceRules.RuleSource planetarySurfaceRuleSource(boolean hasLife)
     {
         ImmutableList.Builder<SurfaceRules.RuleSource> builder = ImmutableList.builder();
         builder.add(SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), SurfaceRules.state(Blocks.BEDROCK.defaultBlockState())));
@@ -410,13 +417,44 @@ public class DynamicSystems {
         return SurfaceRules.sequence(builder.build().toArray(SurfaceRules.RuleSource[]::new));
     }
 
+    //this does technically mean we are limited to planets with 1 character designations
+    //we don't actually have to use the latin alphabet though, I think.
+    private static String planetStarName(CompoundTag planetData)
+    {
+        String v = planetData.getString("name");
+        return v.substring(0,v.length()-1);
+    }
 
 
-    public static LevelStem makeLevelStem(CompoundTag planetData)
+    public static LevelStem makeStar(CompoundTag systemData)
+    {
+        ResourceKey<LevelStem> starKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets", systemData.getString("systemName")));
+        if(!LEVEL_STEMS.containsKey(starKey))
+        {
+            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Biomes.PLAINS);
+            FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
+                    .withBiomeAndLayers(List.of(new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(1,Blocks.BEDROCK)),Optional.empty(),biomeHolder);
+            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(GCYRDimensionTypes.SPACE_TYPE);
+
+            FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
+            LevelStem stem = new LevelStem(holder,flatLevelSource);
+
+            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                    starKey,
+                    stem,
+                    Lifecycle.stable() // use built-in registration info for now
+            );
+        }
+        return LEVEL_STEMS.get(starKey);
+    }
+
+    public static LevelStem makePlanet(CompoundTag planetData)
     {
         ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
-        Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(planetDataToBiome(planetData));
-        Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDynamicDimType(planetData));
+        Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
+        Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDimType(planetData));
+
         if(!LEVEL_STEMS.containsKey(resourcekey))
         {
             NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
@@ -441,9 +479,9 @@ public class DynamicSystems {
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0)),
-                    planetarySurface(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
+                    planetarySurfaceRuleSource(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
                     new OverworldBiomeBuilder().spawnTarget(),
-                    63,
+                    planetData.getInt("seaLevel"),
                     false,
                     true,
                     true,
@@ -458,14 +496,41 @@ public class DynamicSystems {
                     stem,
                     Lifecycle.stable() // use built-in registration info for now
             );
+
             ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
         }
         return LEVEL_STEMS.get(resourcekey);
     }
 
-    public static void makeDynamicWorld(MinecraftServer server, CompoundTag planetData)
+    public static LevelStem makeOrbit(CompoundTag planetData)
     {
-        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
+        //TODO: Abstract, currently uses GCYR
+        ResourceKey<LevelStem> orbitKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_orbit"));
+
+        if(!LEVEL_STEMS.containsKey(orbitKey))
+        {
+            Holder.Reference<DimensionType> orbitHolder = DIMENSION_TYPE.getHolderOrThrow(GCYRDimensionTypes.SPACE_TYPE);
+            Holder.Reference<Biome> orbitBiomeHolder = BIOMES.getHolderOrThrow(GCYRBiomes.SPACE);
+
+            LevelStem orbit = new LevelStem(orbitHolder,new SpaceLevelSource(orbitBiomeHolder));
+
+            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                    orbitKey,
+                    orbit,
+                    Lifecycle.stable() // use built-in registration info for now
+            );
+            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
+            return orbit;
+        }
+        return LEVEL_STEMS.get(orbitKey);
+
+
+    }
+
+    public static void makeDynamicWorld(MinecraftServer server, String name, LevelStem stem)
+    {
+        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryBuild("dataplanets",name));
 
         if(!server.levels.containsKey(dimensionKey))
         {
@@ -474,14 +539,12 @@ public class DynamicSystems {
             ServerLevelData serverleveldata = server.getWorldData().overworldData();
 
             DerivedLevelData derivedleveldata = new DerivedLevelData(server.getWorldData(), serverleveldata);
-            LevelStem stem = makeLevelStem(planetData);
             ServerLevel serverlevel1 = new ServerLevel(server, Util.backgroundExecutor(), server.storageSource, derivedleveldata, dimensionKey, stem, listener, server.getWorldData().isDebugWorld(), BiomeManager.obfuscateSeed(server.getWorldData().worldGenOptions().seed()), ImmutableList.of(), false, server.overworld().getRandomSequences());
             server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
 
             server.levels.put(dimensionKey, serverlevel1);
             MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
         }
-
     }
 
     /**
@@ -497,13 +560,15 @@ public class DynamicSystems {
             if(systems.getTagType(systemId)== Tag.TAG_COMPOUND)
             {
                 CompoundTag systemData = systems.getCompound(systemId);
+                makeDynamicWorld(server,systemId,makeStar(systemData));
+
                 for(String planetId: systemData.getAllKeys())
                 {
-
                     if(systemData.getTagType(planetId)== Tag.TAG_COMPOUND)
                     {
                         System.out.println("creating planet: "+planetId);
-                        makeDynamicWorld(server,systemData.getCompound(planetId));
+                        makeDynamicWorld(server,planetId, makePlanet(systemData.getCompound(planetId)));
+                        makeDynamicWorld(server,planetId+"_orbit",makeOrbit(systemData.getCompound(planetId)));
                     }
                 }
             }

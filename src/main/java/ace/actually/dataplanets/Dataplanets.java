@@ -86,10 +86,6 @@ public class Dataplanets
                 .then(literal("getrps")
                         .executes(context -> {
 
-                            //TODO: it would probably be better to not send the entire tag but just the resources necessary.
-                            //^ its not really a problem, none of the data sent is particularly special ^
-                            CompoundTag tag = context.getSource().getServer().getCommandStorage().get(StarSystemCreator.SYSTEM_DATA);
-
                             //PacketDistributor.PLAYER.with(()->context.getSource().getPlayer()).send();
                             return 1;
                         }))
@@ -101,7 +97,7 @@ public class Dataplanets
     }
 
 
-
+    //TODO: Abstract, currently uses GTCEU
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModEvents
     {

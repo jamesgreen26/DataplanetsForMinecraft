@@ -1,5 +1,6 @@
 package ace.actually.dataplanets.items;
 
+import ace.actually.dataplanets.space.DynamicSystems;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -41,10 +42,10 @@ public class TheoryItem extends Item {
             {
 
                 player.sendSystemMessage(Component.empty()
-                        .append("You theory was successfully proven, new systems are confirmed to exist! The scientific community have been notified!").copy()
+                        .append("You theory was successfully proven, new system(s) are confirmed to exist!").copy()
                         .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)));
 
-
+                DynamicSystems.onGenSetup(world.getServer());
             }
             else
             {
