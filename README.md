@@ -2,19 +2,20 @@
 A mod that uses slightly cursed ~~datapack generation (right now)~~ registry manipulation to add infinite planets to GCYR (right now)
 
 # The Plan
-- [x] Rocky terrestrial planets
-- [x] (Rocky) sea planets
--  [ ] Research System
-- [ ] Space navigation
-  - [ ] Rockets
-  -  [ ] Starships
-- [ ] Gas Giants
-- [ ] Creatures
-  - [ ] Sea Creatures
-  - [ ] Terrestrial Creatures
-- [ ] Space stations 
-- [ ] Story Events
-- [ ] Space factions
+- :green_circle: Rocky terrestrial planets
+- :green_circle: (Rocky) sea planets
+- :orange_circle: Research System
+- :orange_circle: Stars
+- :red_circle: Space navigation
+  - :red_circle: Rockets
+  - :red_circle: Starships
+- :red_circle: Gas Giants
+- :red_circle: Creatures
+  - :red_circle: Sea Creatures
+  - :red_circle: Terrestrial Creatures
+- :red_circle: Space stations 
+- :red_circle: Story Events
+- :red_circle: Space factions
 
 # Notice
 - This mod was originally made for 1.21 as originally posted on the GTCEU discord
