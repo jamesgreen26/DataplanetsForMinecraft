@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-//TODO: reimplement this if we are going to continue to use GCYR.
+//TODO: possibly deprecated, check for other information we don't get currently.
 public class StarSystemRebuilder {
 
     public static void buildRPFromData(CompoundTag tagIn)

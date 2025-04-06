@@ -6,7 +6,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -60,7 +59,7 @@ public abstract class ServerPlayerMixin extends Entity {
                 AttributeModifier modifier = new AttributeModifier(Dataplanets.LOW_GRAVITY, "Low Gravity", mult, AttributeModifier.Operation.MULTIPLY_TOTAL);
                 if(!gravity.hasModifier(modifier))
                 {
-                    gravity.addTransientModifier(modifier);
+                    gravity.addPermanentModifier(modifier);
                 }
                 else
                 {
@@ -88,6 +87,14 @@ public abstract class ServerPlayerMixin extends Entity {
                 }
             }
 
+        }
+        else
+        {
+            AttributeInstance gravity = this.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
+            if(gravity!=null)
+            {
+                gravity.removeModifier(Dataplanets.LOW_GRAVITY);
+            }
         }
     }
 }

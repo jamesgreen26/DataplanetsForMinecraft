@@ -1,5 +1,6 @@
 package ace.actually.dataplanets.space;
 
+import ace.actually.dataplanets.compat.Compat;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 //TODO: remove all datapack file writing as it's no longer necessary, save the CompoundTag to .dat file.
+//TODO: Generify, remove hardcoded GTCEU values
 public class StarSystemCreator {
 
     public static String DATALOC;
@@ -65,8 +67,7 @@ public class StarSystemCreator {
     }
 
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
-    //TODO: Abstract, currently uses GCYR
-    private static final String[] SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
+
     private static void inventSystem(String uuid)
     {
         RandomSource random = RandomSource.create();
@@ -121,7 +122,7 @@ public class StarSystemCreator {
             //temperature limits solar power - that's wierd right?
             //a higher solar power would imply a higher temperature from the sun.
             //(this is a massive simplification when you consider different radiation types...)
-            //however higher temperatures can be generated in a planet without its star (tidal flexing/heating, volcanic activity etc)
+            //however higher temperatures can be generated in a planet without its star (tidal flexing/heating, volcanic activity etc.)
             //hence, as temperature isn't necesarily dependent on the star, its this way round
             //MAYBE: does this make sense?
             planetData.putInt("temperature",initalTemperature);
@@ -252,7 +253,7 @@ public class StarSystemCreator {
             planetData.putInt("grassColour",random.nextInt(16777215));
             planetData.putInt("foliageColour",random.nextInt(16777215));
             planetData.putInt("seaLevel",random.nextInt(63,210));
-            planetData.putString("generalBlock",SURFACE_BLOCKS[random.nextInt(SURFACE_BLOCKS.length)]);
+            planetData.putString("generalBlock", Compat.SURFACE_BLOCKS[random.nextInt(Compat.SURFACE_BLOCKS.length)]);
 
             if(planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0)
             {
@@ -563,7 +564,7 @@ public class StarSystemCreator {
             oreBase="mercury";
         }
 
-        //TODO: Abstract, currently uses GCYR
+        //TODO: Abstract, currently uses GTCEU
         List<Material> ORES = GTMaterialBlocks.MATERIAL_BLOCKS.row(TagPrefix.ore).keySet().stream().toList();
         Material oreMat = ORES.get(random.nextInt(ORES.size()));
         BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();
@@ -778,7 +779,7 @@ public class StarSystemCreator {
                 {
                     return true;
                 }
-                //since we only have 1 number (what temperature it is when its a liquid) we can't infer when something freezes solid
+                //since we only have 1 number (what temperature it is when it's a liquid) we can't infer when something freezes solid
                 //or when something evaporates.
 
                 return false;
@@ -786,7 +787,7 @@ public class StarSystemCreator {
             String matName;
             String fluidName;
 
-            //these first two conditions should only trigger if a planet is really really hot or really really cold.
+            //these first two conditions should only trigger if a planet is really, really hot or really, really cold.
             //and they should only trigger at all if we are in a gamestate where we have no other fluids
             if(materials.isEmpty() && planetData.getInt("temperature")<301)
             {
@@ -874,7 +875,7 @@ public class StarSystemCreator {
     private static String genRocks(CompoundTag planetData, String uuid, RandomSource randomSource)
     {
         StringBuilder features = new StringBuilder();
-        String matName = SURFACE_BLOCKS[randomSource.nextInt(SURFACE_BLOCKS.length)];
+        String matName = Compat.SURFACE_BLOCKS[randomSource.nextInt(Compat.SURFACE_BLOCKS.length)];
 
         ListTag rocks;
         if(planetData.contains("rock_blocks"))

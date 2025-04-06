@@ -2,13 +2,11 @@ package ace.actually.dataplanets.screens;
 
 import ace.actually.dataplanets.blocks.ResearchStationBE;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.awt.*;
 

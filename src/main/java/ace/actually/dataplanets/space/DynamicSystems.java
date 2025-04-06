@@ -1,9 +1,7 @@
 package ace.actually.dataplanets.space;
 
+import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
-import argent_matter.gcyr.common.data.GCYRBiomes;
-import argent_matter.gcyr.common.data.GCYRDimensionTypes;
-import argent_matter.gcyr.common.worldgen.SpaceLevelSource;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.Util;
@@ -51,12 +49,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.level.LevelEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalLong;
+import java.util.*;
 
-//Big props to https://github.com/iPortalTeam/DimLib/blob/1.21/src/main/java/qouteall/dimlib/DynamicDimensionsImpl.java
+/**
+ * Big props to https://github.com/iPortalTeam/DimLib/blob/1.21/src/main/java/qouteall/dimlib/DynamicDimensionsImpl.java
+ * This class can dynamically register most aspects of a world, it should remain generic use Compat.class
+ */
 public class DynamicSystems {
     public static Registry<Biome> BIOMES = null;
     public static Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVERS = null;
@@ -77,7 +75,6 @@ public class DynamicSystems {
         //I would have thought this would have more problems on a smaller modpack actually...
         if(DynamicSystems.allRegistriesFrozen() && frozeTimes>20)
         {
-            //System.out.println("BUILDING PLANETS!");
 
             CompoundTag tag = StarSystemCreator.getDynamicDataOrNew();
             for(String system: tag.getAllKeys())
@@ -419,7 +416,7 @@ public class DynamicSystems {
 
     //this does technically mean we are limited to planets with 1 character designations
     //we don't actually have to use the latin alphabet though, I think.
-    private static String planetStarName(CompoundTag planetData)
+    public static String planetStarName(CompoundTag planetData)
     {
         String v = planetData.getString("name");
         return v.substring(0,v.length()-1);
@@ -434,7 +431,7 @@ public class DynamicSystems {
             Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Biomes.PLAINS);
             FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
                     .withBiomeAndLayers(List.of(new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(1,Blocks.BEDROCK)),Optional.empty(),biomeHolder);
-            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(GCYRDimensionTypes.SPACE_TYPE);
+            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
 
             FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
             LevelStem stem = new LevelStem(holder,flatLevelSource);
@@ -454,7 +451,6 @@ public class DynamicSystems {
         ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
         Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
         Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDimType(planetData));
-
         if(!LEVEL_STEMS.containsKey(resourcekey))
         {
             NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
@@ -499,20 +495,23 @@ public class DynamicSystems {
 
             ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
         }
+
+
+
+
         return LEVEL_STEMS.get(resourcekey);
     }
 
     public static LevelStem makeOrbit(CompoundTag planetData)
     {
-        //TODO: Abstract, currently uses GCYR
         ResourceKey<LevelStem> orbitKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_orbit"));
 
         if(!LEVEL_STEMS.containsKey(orbitKey))
         {
-            Holder.Reference<DimensionType> orbitHolder = DIMENSION_TYPE.getHolderOrThrow(GCYRDimensionTypes.SPACE_TYPE);
-            Holder.Reference<Biome> orbitBiomeHolder = BIOMES.getHolderOrThrow(GCYRBiomes.SPACE);
+            Holder.Reference<DimensionType> orbitHolder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
+            Holder.Reference<Biome> orbitBiomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
 
-            LevelStem orbit = new LevelStem(orbitHolder,new SpaceLevelSource(orbitBiomeHolder));
+            LevelStem orbit = new LevelStem(orbitHolder,Compat.spaceGenerator(orbitBiomeHolder));
 
             ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
             ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(

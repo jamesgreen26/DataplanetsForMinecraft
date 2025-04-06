@@ -1,5 +1,7 @@
 package ace.actually.dataplanets;
 
+import ace.actually.dataplanets.compat.Compat;
+import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import ace.actually.dataplanets.registry.*;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import com.gregtechceu.gtceu.GTCEu;
@@ -7,11 +9,6 @@ import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.data.chemical.material.event.PostMaterialEvent;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -38,14 +35,17 @@ public class Dataplanets
 
     public static final UUID LOW_GRAVITY = UUID.fromString("662A6B8D-DA3E-4C1C-1112-96EA6097278D");
 
-
-    public static final ResourceLocation DATA_STORAGE  = ResourceLocation.tryBuild("dataplanets","data_storage");
-
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Dataplanets()
     {
         // Register the commonSetup method for modloading
+        Compat.loadCompat("gcyr");
+        DPPackets.INSTANCE.messageBuilder(GCYRPacket.class, 0)
+                .encoder(GCYRPacket::encoder)
+                .decoder(GCYRPacket::decoder)
+                .consumerMainThread(GCYRPacket::messageConsumer)
+                .add();
 
         DPTabs.init();
         DPItems.init();
@@ -58,6 +58,7 @@ public class Dataplanets
         bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
         ;
         bus.addGenericListener(MachineDefinition.class, ModEvents::registerMachines);
+
 
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -97,7 +98,7 @@ public class Dataplanets
     }
 
 
-    //TODO: Abstract, currently uses GTCEU
+    //TODO: Generify, currently uses GTCEU
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModEvents
     {
