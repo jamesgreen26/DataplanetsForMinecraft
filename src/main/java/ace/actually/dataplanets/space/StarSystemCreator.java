@@ -1,9 +1,6 @@
 package ace.actually.dataplanets.space;
 
 import ace.actually.dataplanets.compat.Compat;
-import com.gregtechceu.gtceu.api.data.chemical.material.Material;
-import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
-import com.gregtechceu.gtceu.common.data.GTMaterialBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,7 +8,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -22,11 +19,6 @@ import java.util.UUID;
 //TODO: remove all datapack file writing as it's no longer necessary, save the CompoundTag to .dat file.
 //TODO: Generify, remove hardcoded GTCEU values
 public class StarSystemCreator {
-
-    public static String DATALOC;
-    public static String RECLOC;
-    public static List<Material> FLUIDABLE = null;
-    public static final ResourceLocation SYSTEM_DATA = ResourceLocation.tryBuild("dataplanets","system_data");
 
     public static void makeSystem()
     {
@@ -91,7 +83,7 @@ public class StarSystemCreator {
             //however, the planet needs a temeprature of 1000 to get 49 (upper bounds)
             //that's rather warm.
             //nicely, a planet with temperature 401 has a chance of getting 20 (still 1-20 however)
-            planetData.putInt("solarPower",random.nextInt((planetData.getInt("temperature")/20)+1));
+            planetData.putInt("solarPower",random.nextInt((planetData.getInt("temperature")/15)+1));
 
             planetData.putBoolean("hasOxygen",random.nextInt(4)==0);
 
@@ -311,25 +303,8 @@ public class StarSystemCreator {
     private static String genOre(RandomSource random,String uuid,CompoundTag planetData)
     {
 
-        String oreBase = planetData.getString("generalBlock");
-        if(oreBase.contains("mart"))
-        {
-            oreBase="mars";
-        }
-        if(oreBase.contains("venus"))
-        {
-            oreBase="venus";
-        }
-        if(oreBase.contains("mercury"))
-        {
-            oreBase="mercury";
-        }
-
-        //TODO: Abstract, currently uses GTCEU
-        List<Material> ORES = GTMaterialBlocks.MATERIAL_BLOCKS.row(TagPrefix.ore).keySet().stream().toList();
-        Material oreMat = ORES.get(random.nextInt(ORES.size()));
-        BlockState oreState = GTMaterialBlocks.MATERIAL_BLOCKS.get(TagPrefix.ore,oreMat).getDefaultState();
-        ResourceLocation orerl = BuiltInRegistries.BLOCK.getKey(oreState.getBlock());
+        ResourceLocation[] candidate = BuiltInRegistries.BLOCK.keySet().stream().filter(a->a.getPath().contains("_ore")).toArray(ResourceLocation[]::new);
+        ResourceLocation orerl = candidate[random.nextInt(candidate.length)];
         String ore = orerl.toString();
         ListTag ores;
         if(planetData.contains("planet_ores"))
@@ -383,9 +358,9 @@ public class StarSystemCreator {
 
         for (int i = 0; i < 1; i++) {
 
-            List<Material> materials = FLUIDABLE.stream().filter(a->
+            List<Fluid> materials = BuiltInRegistries.FLUID.stream().filter(a->
             {
-                int temp = a.getFluid().getFluidType().getTemperature();
+                int temp = a.getFluidType().getTemperature();
 
                 //if the fluid temperature is >300 it's not set as a liquid at room temperature so is *probably* molten.
                 //in this case, we need the planet to be warmer than its liquid state
@@ -404,6 +379,7 @@ public class StarSystemCreator {
 
                 return false;
             }).toList();
+
             String matName;
             String fluidName;
 
@@ -411,19 +387,15 @@ public class StarSystemCreator {
             //and they should only trigger at all if we are in a gamestate where we have no other fluids
             if(materials.isEmpty() && planetData.getInt("temperature")<301)
             {
-                matName = "ice";
                 fluidName = "minecraft:packed_ice";
             }
             else if(materials.isEmpty() && planetData.getInt("temperature")>300)
             {
-                matName = "lava";
                 fluidName = "minecraft:lava";
             }
             else
             {
-                Material material = materials.get(randomSource.nextInt(materials.size()));
-                fluidName = BuiltInRegistries.FLUID.getKey(material.getFluid()).toString();
-                matName = material.getName();
+                fluidName = BuiltInRegistries.FLUID.getKey(materials.get(randomSource.nextInt(materials.size()))).toString();
             }
 
             ListTag lakes;

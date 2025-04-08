@@ -3,19 +3,9 @@ package ace.actually.dataplanets;
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import ace.actually.dataplanets.registry.*;
-import ace.actually.dataplanets.space.StarSystemCreator;
-import com.gregtechceu.gtceu.GTCEu;
-import com.gregtechceu.gtceu.api.GTCEuAPI;
-import com.gregtechceu.gtceu.api.data.chemical.material.event.PostMaterialEvent;
-import com.gregtechceu.gtceu.api.machine.MachineDefinition;
-import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
-import net.minecraft.locale.Language;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerLifecycleEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -60,9 +50,7 @@ public class Dataplanets
         MinecraftForge.EVENT_BUS.register(this);
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addGenericListener(GTRecipeType.class, ModEvents::registerRecipeTypes);
-        ;
-        bus.addGenericListener(MachineDefinition.class, ModEvents::registerMachines);
+        Compat.modEventBusLoad(bus);
 
 
     }
@@ -91,31 +79,5 @@ public class Dataplanets
     }
 
 
-    //TODO: Generify, currently uses GTCEU
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ModEvents
-    {
-        @SubscribeEvent
-        public static void registerMachines(GTCEuAPI.RegisterEvent<ResourceLocation, MachineDefinition> event) {
-            DPMachines.init();
-        }
-        @SubscribeEvent
-        public static void registerRecipeTypes(GTCEuAPI.RegisterEvent<ResourceLocation, GTRecipeType> event) {
-            DPRecipeTypes.init();
-        }
 
-        @SubscribeEvent
-        public static void postMaterial(PostMaterialEvent event)
-        {
-            //System.out.println("trying to make fluid blocks...");
-
-            StarSystemCreator.FLUIDABLE = GTCEuAPI.materialManager.getRegistry(GTCEu.MOD_ID).getAllMaterials().stream().filter(a->a.hasFluid()).toList();
-            StarSystemCreator.FLUIDABLE.forEach(a->
-            {
-                //System.out.println("Making a fluid block for "+a.getName()+"!");
-                a.getFluidBuilder().block().still();
-            });
-        }
-
-    }
 }

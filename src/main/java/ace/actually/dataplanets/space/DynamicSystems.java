@@ -230,7 +230,7 @@ public class DynamicSystems {
 
             DimensionType dimensionType = new DimensionType(
                     OptionalLong.empty(),
-                    planetData.getInt("solarPower")>5,
+                    planetData.getInt("solarPower")>3,
                     false,
                     planetData.getInt("temperature")>400,
                     true,

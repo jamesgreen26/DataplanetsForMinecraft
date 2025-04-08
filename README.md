@@ -6,9 +6,9 @@ A mod that uses slightly cursed ~~datapack generation (right now)~~ registry man
 - :green_circle: (Rocky) sea planets
 - :orange_circle: Research System
 - :orange_circle: Stars
-- :red_circle: Space navigation
-  - :red_circle: Rockets
-  - :red_circle: Starships
+- :orange_circle: Space navigation
+  - :orange_circle: Rockets (uses GCYR)
+  - :red_circle: Starships (low priority, Cosmic Horizons does exist and will certainly do it better)
 - :red_circle: Gas Giants
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
@@ -29,6 +29,8 @@ This project is made with help and inspiration from team GTIC (more about them t
 # Screenshots so far
 ![dripstoney](https://i.ibb.co/TBFJc4w/image-2025-01-13-111337253.png)
 
-![Old Image](https://media.discordapp.net/attachments/1293662592212009061/1293662592975245384/Screenshot_2024-10-09_204118.png?ex=678617ed&is=6784c66d&hm=64878e2b7b795a115d9b7f237b4965b3ae54a21934119a3eaba35871f0a25f36&=&format=webp&quality=lossless&width=1275&height=671)
+![Deltas](https://media.discordapp.net/attachments/1351288322768633988/1359279447320301839/image.png?ex=67f6e722&is=67f595a2&hm=a78f6130a4931036ce411999f6904969c3fb5e481378eff6d8bc003bafd7c5b4&=&format=webp&quality=lossless&width=1662&height=856)
+
+![Atmosphere](https://media.discordapp.net/attachments/1351288322768633988/1359276442890010644/image.png?ex=67f6e456&is=67f592d6&hm=644a4844a79ff66e9761b41f6f4a90658ffb9a3453910afe67a1e90686b04151&=&format=webp&quality=lossless&width=1632&height=856)
 
 ![planet screen](https://media.discordapp.net/attachments/1293662592212009061/1293662592539033662/Screenshot_2024-10-09_203734.png?ex=678617ed&is=6784c66d&hm=2323c84259425bbfdca8bb6356e43e73ac5942d2d501439128b1264b15363c63&=&format=webp&quality=lossless&width=1060&height=671)

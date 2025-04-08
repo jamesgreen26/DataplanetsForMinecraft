@@ -77,7 +77,7 @@ public class Planets {
                 builder.append(Character.toLowerCase(c));
             }
         }
-        System.out.println(builder);
+
         return builder.toString();
     }
 }
