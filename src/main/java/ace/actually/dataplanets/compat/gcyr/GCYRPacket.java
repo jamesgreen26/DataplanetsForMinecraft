@@ -1,5 +1,7 @@
 package ace.actually.dataplanets.compat.gcyr;
 
+import ace.actually.dataplanets.space.DynamicSystems;
+import ace.actually.dataplanets.space.Planets;
 import argent_matter.gcyr.GCYRClient;
 import argent_matter.gcyr.api.space.planet.PlanetRing;
 import argent_matter.gcyr.api.space.planet.PlanetSkyRenderer;
@@ -43,7 +45,7 @@ public class GCYRPacket {
             {
                 if(data.getTagType(sys)== Tag.TAG_COMPOUND)
                 {
-                    System.out.println(sys);
+                    //System.out.println(sys);
                     CompoundTag systemCompound = data.getCompound(sys);
                     SolarSystem system = new SolarSystem(
                             ResourceLocation.tryParse("gcyr:milky_way"),
@@ -62,6 +64,8 @@ public class GCYRPacket {
                             CompoundTag planetData = systemCompound.getCompound(key);
                             ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
                                     ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")));
+                            ResourceKey<Level> orbitDimension = ResourceKey.create(Registries.DIMENSION,
+                                    ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")+"_orbit"));
                             PlanetSkyRenderer.StarsRenderer starsRenderer = new PlanetSkyRenderer.StarsRenderer(13000,6000,true,true);
                             PlanetSkyRenderer.DimensionEffects dimensionEffects = new PlanetSkyRenderer.DimensionEffects(PlanetSkyRenderer.DimensionEffectType.NONE,0);
                             PlanetSkyRenderer.CloudEffects cloudEffects = PlanetSkyRenderer.CloudEffects.NONE;
@@ -70,17 +74,17 @@ public class GCYRPacket {
                             PlanetRing ring = new PlanetRing(
                                     ResourceLocation.tryParse("gcyr:milky_way"),
                                     ResourceLocation.tryParse("dataplanets:"+systemCompound.getString("systemName")),
-                                    ResourceLocation.tryParse("gcyr:textures/sky/deimos.png"),
-                                    systemCompound.getInt("yearsDays"),
-                                    systemCompound.getInt("scaleClient"),
-                                    systemCompound.getInt("radiusClient"));
+                                    ResourceLocation.tryParse("gcyr:textures/sky/luna.png"),
+                                    planetData.getInt("yearsDays"),
+                                    planetData.getInt("scaleClient"),
+                                    planetData.getFloat("radiusClient"));
 
                             PlanetSkyRenderer.SkyObject sun = new PlanetSkyRenderer.SkyObject(
                                     ResourceLocation.tryParse("gcyr:textures/sky/sun.png"),
                                     true,
                                     PlanetSkyRenderer.RenderType.DYNAMIC,
                                     planetData.getInt("solarPower")+1,
-                                    0,
+                                    16777164,
                                     new Vector3f(0,-90,0));
 
                             PlanetSkyRenderer skyRenderer = new PlanetSkyRenderer(
@@ -90,16 +94,24 @@ public class GCYRPacket {
                                     dimensionEffects,
                                     cloudEffects,
                                     weatherEffects,
-                                    0,
+                                    1,
                                     true,
                                     List.of(sun));
+
+                            PlanetSkyRenderer.SkyObject orbitPlanet = new PlanetSkyRenderer.SkyObject(
+                                    ResourceLocation.tryParse("gcyr:textures/sky/mercury.png"),
+                                    true,
+                                    PlanetSkyRenderer.RenderType.DYNAMIC,
+                                    planetData.getInt("solarPower")+2,
+                                    16777164,
+                                    new Vector3f(0,0,0));
 
                             PlanetSkyRenderer.SkyObject orbitSun = new PlanetSkyRenderer.SkyObject(
                                     ResourceLocation.tryParse("gcyr:textures/sky/sun.png"),
                                     true,
                                     PlanetSkyRenderer.RenderType.STATIC,
                                     15,
-                                    0,
+                                    16777164,
                                     new Vector3f(0,0,0));
                             PlanetSkyRenderer.SkyObject orbitLight = new PlanetSkyRenderer.SkyObject(
                                     ResourceLocation.tryParse("gcyr:textures/sky/light.png"),
@@ -110,7 +122,7 @@ public class GCYRPacket {
                                     new Vector3f(0,0,0));
 
                             PlanetSkyRenderer orbitRenderer = new PlanetSkyRenderer(
-                                    dimension,
+                                    orbitDimension,
                                     Optional.empty(),
                                     starsRenderer,
                                     dimensionEffects,
@@ -118,11 +130,14 @@ public class GCYRPacket {
                                     weatherEffects,
                                     0,
                                     true,
-                                    List.of(orbitSun,orbitLight));
+                                    List.of(orbitPlanet,orbitSun,orbitLight));
 
                             GCYRClient.skyRenderers.add(skyRenderer);
                             GCYRClient.skyRenderers.add(orbitRenderer);
                             GCYRClient.planetRings.add(ring);
+                            GCYRClient.hasUpdatedPlanets=true;
+                            DynamicSystems.TRANSLATIONS.put("level."+planetData.getString("name"), Planets.fancyName(planetData.getString("name")));
+                            DynamicSystems.TRANSLATIONS.put("dataplanets."+systemCompound.getString("systemName"), Planets.fancyName(systemCompound.getString("systemName")));
                             ClientModSkies.register();
                         }
                     }
@@ -136,4 +151,6 @@ public class GCYRPacket {
         });
         ctx.get().setPacketHandled(true);
     }
+
+
 }

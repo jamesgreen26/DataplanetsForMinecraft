@@ -36,6 +36,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
@@ -63,6 +64,7 @@ public class DynamicSystems {
     public static Registry<ConfiguredFeature<?,?>> CONFIGURED_FEATURES = null;
     public static Registry<LevelStem> LEVEL_STEMS = null;
     public static Registry<NormalNoise.NoiseParameters> NOISE = null;
+    public static Map<String,String> TRANSLATIONS = new HashMap<>();
     public static int frozeTimes = 0;
 
     /**
@@ -191,6 +193,13 @@ public class DynamicSystems {
         }
 
 
+         features = makeDelta(planetData);
+        for(ResourceKey<PlacedFeature> feature: features)
+        {
+            builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
+        }
+
+
 
         return builder;
     }
@@ -249,6 +258,48 @@ public class DynamicSystems {
         }
 
         return dimKey;
+    }
+
+    public static List<ResourceKey<PlacedFeature>> makeDelta(CompoundTag planetData)
+    {
+        List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
+        if(planetData.getByteArray("flavour")[3]==1 && planetData.getInt("temperature")>500)
+        {
+            ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_delta"));
+            ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_delta"));
+            if(!PLACED_FEATURES.containsKey(placedKey))
+            {
+                DeltaFeatureConfiguration configuration = new DeltaFeatureConfiguration(Blocks.LAVA.defaultBlockState(),Blocks.MAGMA_BLOCK.defaultBlockState(), UniformInt.of(3,7),UniformInt.of(0,2));
+                ConfiguredFeature<?,?> feature = new ConfiguredFeature<>(Feature.DELTA_FEATURE,configuration);
+
+
+
+                ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(false);
+                ((MappedRegistry<ConfiguredFeature<?,?>>) CONFIGURED_FEATURES).register(
+                        configuredKey,
+                        feature,
+                        Lifecycle.stable() // use built-in registration info for now
+                );
+                ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(true);
+
+                List<PlacementModifier> modifiers = new ArrayList<>();
+                modifiers.add(CountOnEveryLayerPlacement.of(40));
+                PlacedFeature placedFeature = new PlacedFeature(CONFIGURED_FEATURES.getHolderOrThrow(configuredKey),modifiers);
+
+
+
+                ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(false);
+                ((MappedRegistry<PlacedFeature>) PLACED_FEATURES).register(
+                        placedKey,
+                        placedFeature,
+                        Lifecycle.stable() // use built-in registration info for now
+                );
+                ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(true);
+                features.add(placedKey);
+            }
+
+        }
+        return features;
     }
 
     public static List<ResourceKey<PlacedFeature>> makeOres(CompoundTag planetData)
@@ -494,11 +545,10 @@ public class DynamicSystems {
             );
 
             ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
+
         }
 
-
-
-
+        Compat.postLoadPlanet(planetData);
         return LEVEL_STEMS.get(resourcekey);
     }
 

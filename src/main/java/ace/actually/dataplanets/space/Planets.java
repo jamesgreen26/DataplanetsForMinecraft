@@ -49,4 +49,35 @@ public class Planets {
             }
         }
     }
+
+
+    public static String fancyName(String name)
+    {
+        StringBuilder builder = new StringBuilder();
+        int lp = 0;
+        char[] charArray = name.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (Character.isAlphabetic(c)) {
+                builder.append(Character.toUpperCase(c));
+            } else {
+                builder.append('-');
+                lp=i;
+                break;
+            }
+        }
+        while (charArray.length>lp && Character.isDigit(charArray[lp]))
+        {
+            builder.append(charArray[lp]);
+            lp++;
+        }
+        for (int i = lp; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (Character.isAlphabetic(c)) {
+                builder.append(Character.toLowerCase(c));
+            }
+        }
+        System.out.println(builder);
+        return builder.toString();
+    }
 }

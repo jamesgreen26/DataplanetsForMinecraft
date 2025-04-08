@@ -9,9 +9,12 @@ import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.data.chemical.material.event.PostMaterialEvent;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
+import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerLifecycleEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -39,6 +42,8 @@ public class Dataplanets
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Dataplanets()
     {
+
+
         // Register the commonSetup method for modloading
         Compat.loadCompat("gcyr");
         DPPackets.INSTANCE.messageBuilder(GCYRPacket.class, 0)
@@ -63,21 +68,9 @@ public class Dataplanets
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
+    public void onServerStarting(PlayerEvent.PlayerLoggedInEvent event)
     {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-        if(event.getServer().isDedicatedServer())
-        {
-            StarSystemCreator.DATALOC = event.getServer().getServerDirectory().getAbsolutePath() +"\\world\\datapacks\\";
-
-        }
-        else
-        {
-            StarSystemCreator.DATALOC = event.getServer().getServerDirectory().getAbsolutePath() +"\\saves\\"+event.getServer().getWorldData().getLevelName()+"\\datapacks\\";
-
-        }
-        StarSystemCreator.RECLOC = event.getServer().getServerDirectory().getAbsolutePath()+"\\resourcepacks\\";
+        Compat.postLoadGame();
     }
 
     @SubscribeEvent

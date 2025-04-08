@@ -1,6 +1,8 @@
 package ace.actually.dataplanets.compat.gcyr;
 
+import ace.actually.dataplanets.DPPackets;
 import ace.actually.dataplanets.space.DynamicSystems;
+import ace.actually.dataplanets.space.StarSystemCreator;
 import argent_matter.gcyr.api.space.planet.Planet;
 import argent_matter.gcyr.common.worldgen.SpaceLevelSource;
 import argent_matter.gcyr.data.loader.PlanetData;
@@ -12,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +34,8 @@ public class GCYRCompat {
                 dimkey,
                 orbitKey,
                 Optional.empty(),
-                2
-                ,planetData.getInt("gravity"),
+                2,
+                planetData.getInt("gravity"),
                 planetData.getBoolean("hasAtmosphere"),
                 planetData.getInt("yearDays"),
                 planetData.getInt("temperature"),
@@ -47,5 +50,9 @@ public class GCYRCompat {
     public static ChunkGenerator chunkGenerator(Holder.Reference<Biome> biomeHolder)
     {
         return new SpaceLevelSource(biomeHolder);
+    }
+    public static void postLoadGame()
+    {
+        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new GCYRPacket(StarSystemCreator.getDynamicDataOrNew()));
     }
 }

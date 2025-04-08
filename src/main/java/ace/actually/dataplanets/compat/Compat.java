@@ -44,4 +44,12 @@ public class Compat {
         }
         return null;
     }
+
+    public static void postLoadGame()
+    {
+        if(COMPAT_MOD.equals("gcyr"))
+        {
+            GCYRCompat.postLoadGame();
+        }
+    }
 }
