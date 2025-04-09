@@ -19,6 +19,10 @@ public class Compat {
     public static ResourceKey<DimensionType> SPACE_DIMENSION_TYPE;
     public static ResourceKey<Biome> SPACE_BIOME;
 
+    /**
+     * This method is called when Dataplanets is initialized
+     * @param bus
+     */
     public static void modEventBusLoad(IEventBus bus)
     {
         if(COMPAT_MOD.equals("gcyr"))
@@ -27,6 +31,10 @@ public class Compat {
         }
     }
 
+    /**
+     * this method is called after a planet's level stem has been re/created
+     * @param planetData
+     */
     public static void postLoadPlanet(CompoundTag planetData)
     {
         if(COMPAT_MOD.equals("gcyr"))
@@ -34,6 +42,7 @@ public class Compat {
             GCYRCompat.postLoadPlanet(planetData);
         }
     }
+
     public static void loadCompat(String compatmod)
     {
         if(compatmod.equals("gcyr"))
@@ -45,6 +54,11 @@ public class Compat {
         }
     }
 
+    /**
+     * this method is called when building an orbit of a planet
+     * @param biomeHolder
+     * @return
+     */
     public static ChunkGenerator spaceGenerator(Holder.Reference<Biome> biomeHolder)
     {
         if(COMPAT_MOD.equals("gcyr"))
@@ -54,11 +68,14 @@ public class Compat {
         return null;
     }
 
-    public static void postLoadGame()
+    /**
+     * this method is called immediately after first discovering a system, when all chunks are saved, and whenever a player logs in
+     */
+    public static void postLoadWorld()
     {
         if(COMPAT_MOD.equals("gcyr"))
         {
-            GCYRCompat.postLoadGame();
+            GCYRCompat.postLoadWorld();
         }
     }
 }

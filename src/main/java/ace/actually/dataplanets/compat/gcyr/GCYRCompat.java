@@ -51,7 +51,7 @@ public class GCYRCompat {
     {
         return new SpaceLevelSource(biomeHolder);
     }
-    public static void postLoadGame()
+    public static void postLoadWorld()
     {
         DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new GCYRPacket(StarSystemCreator.getDynamicDataOrNew()));
     }

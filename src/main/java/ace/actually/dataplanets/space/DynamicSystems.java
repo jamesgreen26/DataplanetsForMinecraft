@@ -479,9 +479,9 @@ public class DynamicSystems {
         ResourceKey<LevelStem> starKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets", systemData.getString("systemName")));
         if(!LEVEL_STEMS.containsKey(starKey))
         {
-            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Biomes.PLAINS);
+            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
             FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
-                    .withBiomeAndLayers(List.of(new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(1,Blocks.BEDROCK)),Optional.empty(),biomeHolder);
+                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA)),Optional.empty(),biomeHolder);
             Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
 
             FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
@@ -593,6 +593,7 @@ public class DynamicSystems {
 
             server.levels.put(dimensionKey, serverlevel1);
             MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
+            Compat.postLoadWorld();
         }
     }
 

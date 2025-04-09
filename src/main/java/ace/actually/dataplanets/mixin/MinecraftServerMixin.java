@@ -3,11 +3,9 @@ package ace.actually.dataplanets.mixin;
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.space.DynamicSystems;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.progress.ChunkProgressListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftServer.class)
@@ -20,7 +18,7 @@ public abstract class MinecraftServerMixin {
         {
             DynamicSystems.frozeTimes=0;
         }
-        Compat.postLoadGame();
+        Compat.postLoadWorld();
     }
 
 }

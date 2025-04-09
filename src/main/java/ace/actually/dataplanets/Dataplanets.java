@@ -4,7 +4,6 @@ import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import ace.actually.dataplanets.registry.*;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -14,8 +13,6 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import java.util.UUID;
-
-import static net.minecraft.commands.Commands.literal;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Dataplanets.MODID)
@@ -56,26 +53,9 @@ public class Dataplanets
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(PlayerEvent.PlayerLoggedInEvent event)
+    public void playerLogsIn(PlayerEvent.PlayerLoggedInEvent event)
     {
-        Compat.postLoadGame();
-    }
-
-    @SubscribeEvent
-    public void commands(RegisterCommandsEvent event)
-    {
-        event.getDispatcher().register(literal("dataplanets")
-                .then(literal("getrps")
-                        .executes(context -> {
-
-                            //PacketDistributor.PLAYER.with(()->context.getSource().getPlayer()).send();
-                            return 1;
-                        }))
-                .then(literal("reload")
-                        .executes(context -> {
-
-                            return 1;
-                        })));
+        Compat.postLoadWorld();
     }
 
 
