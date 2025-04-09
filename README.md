@@ -9,7 +9,7 @@ A mod that uses slightly cursed ~~datapack generation (right now)~~ registry man
 - :orange_circle: Space navigation
   - :orange_circle: Rockets (uses GCYR)
   - :red_circle: Starships (low priority, Cosmic Horizons does exist and will certainly do it better)
-- :red_circle: Gas Giants
+- :orange_circle: Gas Giants
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
   - :red_circle: Terrestrial Creatures

@@ -12,14 +12,22 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class ResearchStationBlock extends BaseEntityBlock {
@@ -41,7 +49,7 @@ public class ResearchStationBlock extends BaseEntityBlock {
             {
                 ItemStack stack = player.getItemInHand(hand);
 
-                if(stack.is(DPItems.TEST_ITEM.get()))
+                if(stack.is(DPItems.RESEARCH.get()))
                 {
                     if(stack.hasTag())
                     {
@@ -70,6 +78,22 @@ public class ResearchStationBlock extends BaseEntityBlock {
 
         }
         return super.use(p_60503_,level, p_60505_, player, hand, p_60508_);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49915_) {
+        super.createBlockStateDefinition(p_49915_.add(BlockStateProperties.HORIZONTAL_FACING));
+    }
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext p_49820_) {
+        return super.getStateForPlacement(p_49820_).setValue(BlockStateProperties.HORIZONTAL_FACING,p_49820_.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+        return Block.box(2,0,2,14,2,14);
     }
 
     @Nullable

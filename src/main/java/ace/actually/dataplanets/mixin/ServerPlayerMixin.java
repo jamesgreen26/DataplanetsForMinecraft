@@ -74,15 +74,15 @@ public abstract class ServerPlayerMixin extends Entity {
                     ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",this.level().dimension().location().getPath()+"_orbit"));
                     if(this.getServer().levels.containsKey(resourcekey))
                     {
-                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),0,getOnPos().getZ(),Set.of(),0,0);
+                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),100,getOnPos().getZ(),Set.of(),0,0);
                     }
                 }
-                if(getOnPos().getY()<-60 && this.level().dimension().location().getPath().contains("orbit"))
+                if(getOnPos().getY()<10 && this.level().dimension().location().getPath().contains("orbit"))
                 {
                     ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",this.level().dimension().location().getPath().replace("_orbit","")));
                     if(this.getServer().levels.containsKey(resourcekey))
                     {
-                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),350,getOnPos().getZ(),Set.of(),0,0);
+                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),300,getOnPos().getZ(),Set.of(),0,0);
                     }
                 }
             }

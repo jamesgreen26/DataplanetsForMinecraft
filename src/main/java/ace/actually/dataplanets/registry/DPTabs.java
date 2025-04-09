@@ -9,7 +9,7 @@ public class DPTabs {
 
       public static RegistryEntry<CreativeModeTab> TAB = Reg.REGISTRATE.defaultCreativeTab("dataplanets",
                   builder -> builder.displayItems(new GTCreativeModeTabs.RegistrateDisplayItemsGenerator("dataplanets", Reg.REGISTRATE))
-                          .icon(()->DPItems.THEORY_2.asStack())
+                          .icon(()->DPItems.THEORY.asStack())
                           .title(Component.literal("Dataplanets"))
                           .build())
                   .register();

@@ -19,8 +19,8 @@ public class DPRecipes {
                 .outputItems(DPItems.RESEARCH)
                 .save(provider);
 
-        VanillaRecipeHelper.addShapelessRecipe(provider,ResourceLocation.tryBuild("dataplanets","theorycraft1"),
-                new ItemStack(DPItems.THEORY_2.get()),new ItemStack(DPItems.THEORY_RADIO.get()),new ItemStack(DPItems.THEORY_VISIBLE.get()));
+        //VanillaRecipeHelper.addShapelessRecipe(provider,ResourceLocation.tryBuild("dataplanets","theorycraft1"),
+        //       new ItemStack(DPItems.THEORY_2.get()),new ItemStack(DPItems.THEORY_RADIO.get()),new ItemStack(DPItems.THEORY.get()));
 
 
         DPRecipeTypes.RADIO_RECIPE_TYPE.recipeBuilder(ResourceLocation.tryBuild("dataplanets","radio_recipes"))

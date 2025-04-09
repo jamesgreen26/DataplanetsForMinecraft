@@ -2,6 +2,7 @@ package ace.actually.dataplanets.space;
 
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
+import ace.actually.dataplanets.registry.DPBlocks;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.Util;
@@ -481,7 +482,30 @@ public class DynamicSystems {
         {
             Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
             FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
-                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA)),Optional.empty(),biomeHolder);
+                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
+            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
+
+            FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
+            LevelStem stem = new LevelStem(holder,flatLevelSource);
+
+            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                    starKey,
+                    stem,
+                    Lifecycle.stable() // use built-in registration info for now
+            );
+        }
+        return LEVEL_STEMS.get(starKey);
+    }
+
+    public static LevelStem makeGasPlanet(CompoundTag planetData)
+    {
+        ResourceKey<LevelStem> starKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets", planetData.getString("name")));
+        if(!LEVEL_STEMS.containsKey(starKey))
+        {
+            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
+            FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
+                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
             Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
 
             FlatLevelSource flatLevelSource = new FlatLevelSource(settings);

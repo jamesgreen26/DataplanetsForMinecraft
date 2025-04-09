@@ -4,7 +4,6 @@ import ace.actually.dataplanets.registry.DPItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -107,7 +106,7 @@ public class ResearchStationBE extends BlockEntity {
                         container.getItem(i);
                         if(container.getItem(i).isEmpty())
                         {
-                            container.setItem(i,new ItemStack(DPItems.THEORY_VISIBLE));
+                            container.setItem(i,new ItemStack(DPItems.THEORY));
                             found = true;
                             break;
                         }

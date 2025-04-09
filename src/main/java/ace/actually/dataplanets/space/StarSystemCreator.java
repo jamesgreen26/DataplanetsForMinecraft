@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 //TODO: remove all datapack file writing as it's no longer necessary, save the CompoundTag to .dat file.
-//TODO: Generify, remove hardcoded GTCEU values
 public class StarSystemCreator {
 
     public static void makeSystem()

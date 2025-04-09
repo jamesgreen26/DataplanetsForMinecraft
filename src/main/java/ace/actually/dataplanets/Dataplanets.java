@@ -3,6 +3,9 @@ package ace.actually.dataplanets;
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import ace.actually.dataplanets.registry.*;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.client.event.RegisterNamedRenderTypesEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -48,6 +51,7 @@ public class Dataplanets
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Compat.modEventBusLoad(bus);
+
 
 
     }
