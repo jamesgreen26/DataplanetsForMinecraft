@@ -518,6 +518,7 @@ public class DynamicSystems {
                     Lifecycle.stable() // use built-in registration info for now
             );
         }
+        Compat.postLoadPlanet(planetData);
         return LEVEL_STEMS.get(starKey);
     }
 
@@ -638,11 +639,20 @@ public class DynamicSystems {
 
                 for(String planetId: systemData.getAllKeys())
                 {
+                    CompoundTag planetData = systemData.getCompound(planetId);
                     if(systemData.getTagType(planetId)== Tag.TAG_COMPOUND)
                     {
                         System.out.println("creating planet: "+planetId);
-                        makeDynamicWorld(server,planetId, makePlanet(systemData.getCompound(planetId)));
-                        makeDynamicWorld(server,planetId+"_orbit",makeOrbit(systemData.getCompound(planetId)));
+                        if(planetData.contains("planetType") && planetData.getString("planetType").equals("gaseous"))
+                        {
+                            makeDynamicWorld(server,planetId,makeGasPlanet(planetData));
+                        }
+                        else
+                        {
+                            makeDynamicWorld(server,planetId, makePlanet(planetData));
+                        }
+
+                        makeDynamicWorld(server,planetId+"_orbit",makeOrbit(planetData));
                     }
                 }
             }

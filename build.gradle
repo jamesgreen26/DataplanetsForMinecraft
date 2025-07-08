@@ -204,8 +204,6 @@ dependencies {
     implementation fg.deobf("curse.maven:gcyr-922713:6016659") { transitive = false }
 
 
-    implementation fg.deobf("dev.latvian.mods:kubejs-forge:2001.6.5-build.14")
-    implementation fg.deobf("dev.latvian.mods:rhino-forge:2001.2.3-build.6")
     runtimeOnly fg.deobf("dev.toma.configuration:configuration-forge-1.20.1:2.2.0")
     runtimeOnly fg.deobf("dev.architectury:architectury-forge:9.2.14")
 

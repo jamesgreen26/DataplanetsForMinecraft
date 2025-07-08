@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-//TODO: remove all datapack file writing as it's no longer necessary, save the CompoundTag to .dat file.
 public class StarSystemCreator {
 
     public static void makeSystem()
@@ -69,6 +68,10 @@ public class StarSystemCreator {
             {
                 initalTemperature+=100;
             }
+            if(random.nextInt(10)==0)
+            {
+                planetData.putString("planetType","gaseous");
+            }
 
             //temperature limits solar power - that's wierd right?
             //a higher solar power would imply a higher temperature from the sun.
@@ -117,10 +120,12 @@ public class StarSystemCreator {
                     if(planetData.getInt("temperature")>273)
                     {
                         planetData.putString("seaBlock","minecraft:water");
+                        planetData.putString("planetType","ocean");
                     }
                     else
                     {
                         planetData.putString("seaBlock","minecraft:packed_ice");
+                        planetData.putString("planetType","icy");
                     }
 
                 }
@@ -162,99 +167,6 @@ public class StarSystemCreator {
 
             planetData.putFloat("radiusClient",(((50f-planetData.getInt("solarPower")) /10f)+random.nextFloat()));
             planetData.putInt("scaleClient",random.nextInt(5,20));
-
-            List<String> planet_rings = List.of("{\n" +
-                    "  \"galaxy\": \"gcyr:milky_way\",\n" +
-                    "  \"solar_system\": \"dataplanets:SOMEWHERE\",\n".replace("SOMEWHERE",systemName) +
-                    "  \"texture\": \"gcyr:textures/sky/deimos.png\",\n" +
-                    "  \"speed\": S,\n".replace("S",""+planetData.getInt("yearDays")) +
-                    "  \"scale\": S,\n".replace("S",""+planetData.getInt("scaleClient")) +
-                    "  \"radius\": X\n".replace("X",""+planetData.getFloat("radiusClient")) +
-                    "}");
-
-            List<String> sky_renderer = List.of("{\n" +
-                    "  \"world\": \"dataplanets:SW\",\n".replace("SW",planetName) +
-                    "  \"stars\": {\n" +
-                    "    \"fancy_count\": 13000,\n" +
-                    "    \"fast_count\": 6000,\n" +
-                    "    \"colored_stars\": true,\n" +
-                    "    \"daylight_visible\": true\n" +
-                    "  },\n" +
-                    "  \"sunset_color\": \"none\",\n" +
-                    "  \"dimension_effects\": {\n" +
-                    "    \"type\": \"none\"\n" +
-                    "  },\n" +
-                    "  \"cloud_effects\": \"none\",\n" +
-                    "  \"weather_effects\": \"none\",\n" +
-                    "  \"horizon_angle\": 0,\n" +
-                    "  \"sky_objects\": [\n" +
-                    "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
-                    "      \"blending\": true,\n" +
-                    "      \"render_type\": \"dynamic\",\n" +
-                    "      \"scale\": SZ,\n".replace("SZ",""+(planetData.getInt("solarPower")+1)) +
-                    "      \"rotation\": [\n" +
-                    "        0.0,\n" +
-                    "        -90.0,\n" +
-                    "        0.0\n" +
-                    "      ]\n" +
-                    "    }\n" +
-                    "  ]\n" +
-                    "}");
-
-            List<String> orbit_skybox = List.of("{\n" +
-                    "  \"world\": \"dataplanets:SW_orbit\",\n".replace("SW",planetName) +
-                    "  \"stars\": {\n" +
-                    "    \"fancy_count\": 13000,\n" +
-                    "    \"fast_count\": 6000,\n" +
-                    "    \"colored_stars\": true,\n" +
-                    "    \"daylight_visible\": true\n" +
-                    "  },\n" +
-                    "  \"sunset_color\": \"none\",\n" +
-                    "  \"dimension_effects\": {\n" +
-                    "    \"type\": \"none\"\n" +
-                    "  },\n" +
-                    "  \"cloud_effects\": \"none\",\n" +
-                    "  \"weather_effects\": \"none\",\n" +
-                    "  \"horizon_angle\": 0,\n" +
-                    "  \"sky_objects\": [\n" +
-                    "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/mercury.png\",\n" +
-                    "      \"blending\": true,\n" +
-                    "      \"render_type\": \"dynamic\",\n" +
-                    "      \"scale\": SZ,\n".replace("SZ",""+(planetData.getInt("solarPower")+2)) +
-                    "      \"rotation\": [\n" +
-                    "        0.0,\n" +
-                    "        -90.0,\n" +
-                    "        0.0\n" +
-                    "      ]\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/sun.png\",\n" +
-                    "      \"blending\": true,\n" +
-                    "      \"render_type\": \"static\",\n" +
-                    "      \"scale\": 15.0,\n" +
-                    "      \"rotation\": [\n" +
-                    "        0.0,\n" +
-                    "        0.0,\n" +
-                    "        0.0\n" +
-                    "      ]\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "      \"texture\": \"gcyr:textures/sky/light.png\",\n" +
-                    "      \"blending\": true,\n" +
-                    "      \"render_type\": \"static\",\n" +
-                    "      \"scale\": 20.0,\n" +
-                    "      \"color\": 16777164,\n" +
-                    "      \"rotation\": [\n" +
-                    "        0.0,\n" +
-                    "        0.0,\n" +
-                    "        0.0\n" +
-                    "      ]\n" +
-                    "    }\n" +
-                    "  ]\n" +
-                    "}");
-
 
             langFile.append("\"level.").append(planetName).append("\":\"");
             rebuild = planetName.toUpperCase();
