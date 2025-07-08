@@ -6,16 +6,16 @@ A mod that uses slightly cursed ~~datapack generation (right now)~~ registry man
 - :green_circle: (Rocky) sea planets
 - :orange_circle: Research System
 - :orange_circle: Stars
-- :orange_circle: Space navigation
-  - :orange_circle: Rockets (uses GCYR)
-  - :red_circle: Starships (low priority, Cosmic Horizons does exist and will certainly do it better)
 - :orange_circle: Gas Giants
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
   - :red_circle: Terrestrial Creatures
-- :red_circle: Space stations 
+- :orange_circle: Space stations 
 - :red_circle: Story Events
 - :red_circle: Space factions
+- ~~Space navigation~~
+  - ~~Rockets (uses GCYR)~~
+  - ~~Starships~~
 
 # Notice
 - This mod was originally made for 1.21 as originally posted on the GTCEU discord
