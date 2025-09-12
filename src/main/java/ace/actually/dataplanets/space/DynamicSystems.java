@@ -4,6 +4,7 @@ import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.interfaces.IUnfreezableRegistry;
 import ace.actually.dataplanets.registry.DPBlocks;
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -115,9 +116,9 @@ public class DynamicSystems {
                 && NOISE!=null;
     }
 
-    public static ResourceKey<Biome> makeBiome(CompoundTag planetData)
+    public static ResourceKey<Biome> makeBiome(CompoundTag biomeData)
     {
-        ResourceKey<Biome> biomeKey = ResourceKey.create(BIOMES.key(), ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_terrain"));
+        ResourceKey<Biome> biomeKey = ResourceKey.create(BIOMES.key(), ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_terrain"));
 
         if(!BIOMES.containsKey(biomeKey))
         {
@@ -126,14 +127,14 @@ public class DynamicSystems {
                     .temperature(0.93f)
                     .hasPrecipitation(false)
                     .specialEffects(new BiomeSpecialEffects.Builder()
-                            .skyColor(planetData.getInt("skyColour"))
-                            .fogColor(planetData.getInt("fogColour"))
-                            .waterColor(planetData.getInt("waterColour"))
-                            .waterFogColor(planetData.getInt("waterFogColour"))
-                            .grassColorOverride(planetData.getInt("grassColour"))
-                            .foliageColorOverride(planetData.getInt("foliage")).build())
+                            .skyColor(biomeData.getInt("skyColour"))
+                            .fogColor(biomeData.getInt("fogColour"))
+                            .waterColor(biomeData.getInt("waterColour"))
+                            .waterFogColor(biomeData.getInt("waterFogColour"))
+                            .grassColorOverride(biomeData.getInt("grassColour"))
+                            .foliageColorOverride(biomeData.getInt("foliage")).build())
                     .mobSpawnSettings(new MobSpawnSettings.Builder().build())
-                    .generationSettings(builder(new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.EMPTY),planetData).build()).build();
+                    .generationSettings(builder(new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.EMPTY),biomeData).build()).build();
 
 
             ((IUnfreezableRegistry) BIOMES).setRegFrozen(false);
@@ -147,7 +148,7 @@ public class DynamicSystems {
         return biomeKey;
     }
 
-    private static BiomeGenerationSettings.PlainBuilder builder(BiomeGenerationSettingsBuilder builder,CompoundTag planetData)
+    private static BiomeGenerationSettings.PlainBuilder builder(BiomeGenerationSettingsBuilder builder,CompoundTag biomeData)
     {
         Holder.Reference<ConfiguredWorldCarver<?>> canyon = CONFIGURED_CARVERS.getHolderOrThrow(Carvers.CANYON);
         Holder.Reference<ConfiguredWorldCarver<?>> cave = CONFIGURED_CARVERS.getHolderOrThrow(Carvers.CAVE);
@@ -162,7 +163,7 @@ public class DynamicSystems {
                 .addCarver(GenerationStep.Carving.AIR,cave)
                 .addCarver(GenerationStep.Carving.AIR,cave_extra);
 
-        byte[] flavour = planetData.getByteArray("flavour");
+        byte[] flavour = biomeData.getByteArray("flavour");
         if(flavour[0]==1)
         {
             builder.addFeature(0,dripstone_cluster);
@@ -177,24 +178,24 @@ public class DynamicSystems {
         }
 
 
-        List<ResourceKey<PlacedFeature>> features = makeOres(planetData);
+        List<ResourceKey<PlacedFeature>> features = makeOres(biomeData);
         for(ResourceKey<PlacedFeature> feature: features)
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
         }
-        features = makeLakes(planetData);
+        features = makeLakes(biomeData);
         for(ResourceKey<PlacedFeature> feature: features)
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
         }
-        features = makeRocks(planetData);
+        features = makeRocks(biomeData);
         for(ResourceKey<PlacedFeature> feature: features)
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
         }
 
 
-         features = makeDelta(planetData);
+         features = makeDelta(biomeData);
         for(ResourceKey<PlacedFeature> feature: features)
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
@@ -261,13 +262,13 @@ public class DynamicSystems {
         return dimKey;
     }
 
-    public static List<ResourceKey<PlacedFeature>> makeDelta(CompoundTag planetData)
+    public static List<ResourceKey<PlacedFeature>> makeDelta(CompoundTag biomeData)
     {
         List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
-        if(planetData.getByteArray("flavour")[3]==1 && planetData.getInt("temperature")>500)
+        if(biomeData.getByteArray("flavour")[3]==1 && biomeData.getInt("temperature")>500)
         {
-            ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_delta"));
-            ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_delta"));
+            ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_delta"));
+            ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_delta"));
             if(!PLACED_FEATURES.containsKey(placedKey))
             {
                 DeltaFeatureConfiguration configuration = new DeltaFeatureConfiguration(Blocks.LAVA.defaultBlockState(),Blocks.MAGMA_BLOCK.defaultBlockState(), UniformInt.of(3,7),UniformInt.of(0,2));
@@ -303,15 +304,15 @@ public class DynamicSystems {
         return features;
     }
 
-    public static List<ResourceKey<PlacedFeature>> makeOres(CompoundTag planetData)
+    public static List<ResourceKey<PlacedFeature>> makeOres(CompoundTag biomeData)
     {
         List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
-        if(planetData.contains("planet_ores"))
+        if(biomeData.contains("biome_ores"))
         {
-            ListTag ores = (ListTag) planetData.get("planet_ores");
+            ListTag ores = (ListTag) biomeData.get("biome_ores");
             for (int i = 0; i < ores.size(); i++) {
-                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_ore_"+i));
-                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_ore_"+i));
+                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_ore_"+i));
+                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_ore_"+i));
                 if(!PLACED_FEATURES.containsKey(placedKey))
                 {
                     BlockState oreState = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(ores.getString(i))).defaultBlockState();
@@ -352,16 +353,16 @@ public class DynamicSystems {
         }
         return features;
     }
-    public static List<ResourceKey<PlacedFeature>> makeLakes(CompoundTag planetData)
+    public static List<ResourceKey<PlacedFeature>> makeLakes(CompoundTag biomeData)
     {
         List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
-        if(planetData.contains("lakeFluids"))
+        if(biomeData.contains("lakeFluids"))
         {
-            ListTag lakes = (ListTag) planetData.get("lakeFluids");
-            BlockState barrier = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState();
+            ListTag lakes = (ListTag) biomeData.get("lakeFluids");
+            BlockState barrier = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(biomeData.getString("generalBlock"))).defaultBlockState();
             for (int i = 0; i < lakes.size(); i++) {
-                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_lake_"+i));
-                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_lake_"+i));
+                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_lake_"+i));
+                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_lake_"+i));
                 if(!PLACED_FEATURES.containsKey(placedKey))
                 {
                     BlockState fluid = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(lakes.getString(i))).defaultBlockState();
@@ -525,7 +526,6 @@ public class DynamicSystems {
     public static LevelStem makePlanet(CompoundTag planetData)
     {
         ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
-        Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
         Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDimType(planetData));
         if(!LEVEL_STEMS.containsKey(resourcekey))
         {
@@ -559,7 +559,25 @@ public class DynamicSystems {
                     true,
                     false
             );
-            NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(new FixedBiomeSource(biomeHolder), Holder.direct(settings));
+            //Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
+
+            List<Pair<Climate.ParameterPoint,Holder<Biome>>> biomes = new ArrayList<>();
+            ListTag biomesTag = planetData.getList("biomes",ListTag.TAG_COMPOUND);
+            for (int i = 0; i < biomesTag.size(); i++) {
+                biomes.add(new Pair<>(
+                        new Climate.ParameterPoint(
+                                Climate.Parameter.point(1),
+                                Climate.Parameter.point(1),
+                                Climate.Parameter.point(1),
+                                Climate.Parameter.point(1),
+                                Climate.Parameter.point(1),
+                                Climate.Parameter.point(1),
+                                1
+                        ),BIOMES.getHolderOrThrow(makeBiome(biomesTag.getCompound(i)))));
+            }
+
+            MultiNoiseBiomeSource n = MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(biomes));
+            NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(n, Holder.direct(settings));
             LevelStem stem = new LevelStem(holder,noiseBasedChunkGenerator);
 
             ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);

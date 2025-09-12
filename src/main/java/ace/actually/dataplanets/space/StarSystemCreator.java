@@ -102,16 +102,8 @@ public class StarSystemCreator {
             planetData.putString("effects",effects);
 
 
-            //TODO: multiple biomes per planet
-
-            planetData.putInt("skyColour",random.nextInt(16777215));
-            planetData.putInt("fogColour",random.nextInt(16777215));
-            planetData.putInt("waterColour",random.nextInt(16777215));
-            planetData.putInt("waterFogColour",random.nextInt(16777215));
-            planetData.putInt("grassColour",random.nextInt(16777215));
-            planetData.putInt("foliageColour",random.nextInt(16777215));
-            planetData.putInt("seaLevel",random.nextInt(63,210));
             planetData.putString("generalBlock", Compat.SURFACE_BLOCKS[random.nextInt(Compat.SURFACE_BLOCKS.length)]);
+
 
             if(planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0)
             {
@@ -154,7 +146,7 @@ public class StarSystemCreator {
             }
             planetData.putByteArray("flavour",flavour);
 
-            shouldGenDripstone(planetData,random);
+            //shouldGenDripstone(planetData,random);
             genLakes(planetData,uuid,random);
             genRocks(planetData,uuid,random);
             genOre(random,uuid,planetData);
@@ -167,6 +159,31 @@ public class StarSystemCreator {
 
             planetData.putFloat("radiusClient",(((50f-planetData.getInt("solarPower")) /10f)+random.nextFloat()));
             planetData.putInt("scaleClient",random.nextInt(5,20));
+
+            //TODO: multiple biomes per planet
+            ListTag biomeList = new ListTag();
+            for (int j = 0; j < 3; j++) {
+
+                CompoundTag biomeCompound = new CompoundTag();
+
+                biomeCompound.putInt("skyColour",random.nextInt(16777215));
+                biomeCompound.putInt("fogColour",random.nextInt(16777215));
+                biomeCompound.putInt("waterColour",random.nextInt(16777215));
+                biomeCompound.putInt("waterFogColour",random.nextInt(16777215));
+                biomeCompound.putInt("grassColour",random.nextInt(16777215));
+                biomeCompound.putInt("foliageColour",random.nextInt(16777215));
+                biomeCompound.putInt("seaLevel",random.nextInt(63,210));
+                biomeCompound.putString("generalBlock",planetData.getString("generalBlock"));
+                biomeCompound.putInt("temperature",planetData.getInt("temperature")+random.nextInt(-20,20));
+                biomeCompound.put("biome_ores",planetData.getList("planet_ores",ListTag.TAG_STRING));
+                biomeCompound.put("rock_blocks",planetData.getList("rock_blocks",ListTag.TAG_STRING));
+                biomeCompound.put("lakeFluids",planetData.getList("lakeFluids",ListTag.TAG_STRING));
+                biomeCompound.putByteArray("flavour",planetData.getByteArray("flavour"));
+                biomeCompound.putString("name",planetData.getString("name")+random.nextInt(10000));
+                biomeList.add(biomeCompound);
+            }
+
+            planetData.put("biomes",biomeList);
 
             langFile.append("\"level.").append(planetName).append("\":\"");
             rebuild = planetName.toUpperCase();
