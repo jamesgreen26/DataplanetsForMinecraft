@@ -1,9 +1,10 @@
 package ace.actually.dataplanets.compat;
 
+import ace.actually.dataplanets.DPPackets;
 import ace.actually.dataplanets.compat.gcyr.GCYRCompat;
 import ace.actually.dataplanets.compat.gtceu.GTCEUCompat;
-import argent_matter.gcyr.common.data.GCYRBiomes;
-import argent_matter.gcyr.common.data.GCYRDimensionTypes;
+import ace.actually.dataplanets.space.S2PTranslationPacket;
+import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.network.PacketDistributor;
 
 public class Compat {
 
@@ -47,10 +49,7 @@ public class Compat {
     {
         if(compatmod.equals("gcyr"))
         {
-            COMPAT_MOD="gcyr";
-            SPACE_DIMENSION_TYPE = GCYRDimensionTypes.SPACE_TYPE;
-            SPACE_BIOME = GCYRBiomes.SPACE;
-            SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
+            GCYRCompat.loadCompat();
         }
     }
 
@@ -77,5 +76,6 @@ public class Compat {
         {
             GCYRCompat.postLoadWorld();
         }
+        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PTranslationPacket(StarSystemCreator.getDynamicDataOrNew()));
     }
 }

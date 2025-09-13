@@ -3,7 +3,6 @@ package ace.actually.dataplanets.compat.gtceu;
 import ace.actually.dataplanets.Dataplanets;
 import ace.actually.dataplanets.registry.DPMachines;
 import ace.actually.dataplanets.registry.DPRecipeTypes;
-import ace.actually.dataplanets.space.StarSystemCreator;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.data.chemical.material.event.PostMaterialEvent;

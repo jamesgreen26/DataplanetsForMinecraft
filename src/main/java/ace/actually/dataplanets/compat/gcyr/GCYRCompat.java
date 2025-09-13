@@ -1,9 +1,12 @@
 package ace.actually.dataplanets.compat.gcyr;
 
 import ace.actually.dataplanets.DPPackets;
+import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.space.DynamicSystems;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import argent_matter.gcyr.api.space.planet.Planet;
+import argent_matter.gcyr.common.data.GCYRBiomes;
+import argent_matter.gcyr.common.data.GCYRDimensionTypes;
 import argent_matter.gcyr.common.worldgen.SpaceLevelSource;
 import argent_matter.gcyr.data.loader.PlanetData;
 import net.minecraft.core.Holder;
@@ -54,5 +57,13 @@ public class GCYRCompat {
     public static void postLoadWorld()
     {
         DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new GCYRPacket(StarSystemCreator.getDynamicDataOrNew()));
+    }
+    public static void loadCompat()
+    {
+        Compat.COMPAT_MOD="gcyr";
+        Compat.SPACE_DIMENSION_TYPE = GCYRDimensionTypes.SPACE_TYPE;
+        Compat.SPACE_BIOME = GCYRBiomes.SPACE;
+        Compat.SURFACE_BLOCKS = new String[]{"gcyr:moon_stone","gcyr:moon_cobblestone","gcyr:venusian_regolith","gcyr:martian_rock"};
+
     }
 }

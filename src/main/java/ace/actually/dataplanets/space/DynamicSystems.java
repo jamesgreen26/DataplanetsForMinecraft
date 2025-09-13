@@ -55,7 +55,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import java.util.*;
 
 /**
- * Big props to https://github.com/iPortalTeam/DimLib/blob/1.21/src/main/java/qouteall/dimlib/DynamicDimensionsImpl.java
+ * Big props to <a href="https://github.com/iPortalTeam/DimLib/blob/1.21/src/main/java/qouteall/dimlib/DynamicDimensionsImpl.java">...</a>
  * This class can dynamically register most aspects of a world, it should remain generic use Compat.class
  */
 public class DynamicSystems {

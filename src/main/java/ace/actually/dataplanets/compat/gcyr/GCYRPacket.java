@@ -136,8 +136,6 @@ public class GCYRPacket {
                             GCYRClient.skyRenderers.add(orbitRenderer);
                             GCYRClient.planetRings.add(ring);
                             GCYRClient.hasUpdatedPlanets=true;
-                            DynamicSystems.TRANSLATIONS.put("level."+planetData.getString("name"), Planets.fancyName(planetData.getString("name")));
-                            DynamicSystems.TRANSLATIONS.put("dataplanets."+systemCompound.getString("systemName"), Planets.fancyName(systemCompound.getString("systemName")));
                             ClientModSkies.register();
                         }
                     }

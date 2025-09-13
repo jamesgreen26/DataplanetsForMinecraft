@@ -160,7 +160,8 @@ public class StarSystemCreator {
             planetData.putFloat("radiusClient",(((50f-planetData.getInt("solarPower")) /10f)+random.nextFloat()));
             planetData.putInt("scaleClient",random.nextInt(5,20));
 
-            //TODO: multiple biomes per planet
+            planetData.putInt("seaLevel",random.nextInt(63,210));
+
             ListTag biomeList = new ListTag();
             for (int j = 0; j < 3; j++) {
 
@@ -172,7 +173,7 @@ public class StarSystemCreator {
                 biomeCompound.putInt("waterFogColour",random.nextInt(16777215));
                 biomeCompound.putInt("grassColour",random.nextInt(16777215));
                 biomeCompound.putInt("foliageColour",random.nextInt(16777215));
-                biomeCompound.putInt("seaLevel",random.nextInt(63,210));
+
                 biomeCompound.putString("generalBlock",planetData.getString("generalBlock"));
                 biomeCompound.putInt("temperature",planetData.getInt("temperature")+random.nextInt(-20,20));
                 biomeCompound.put("biome_ores",planetData.getList("planet_ores",ListTag.TAG_STRING));
