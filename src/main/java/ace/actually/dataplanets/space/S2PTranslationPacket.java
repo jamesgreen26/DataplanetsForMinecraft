@@ -1,6 +1,5 @@
 package ace.actually.dataplanets.space;
 
-import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;

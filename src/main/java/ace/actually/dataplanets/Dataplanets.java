@@ -1,12 +1,8 @@
 package ace.actually.dataplanets;
 
 import ace.actually.dataplanets.compat.Compat;
-import ace.actually.dataplanets.compat.gcyr.GCYRPacket;
 import ace.actually.dataplanets.registry.*;
 import ace.actually.dataplanets.space.S2PTranslationPacket;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.event.RegisterNamedRenderTypesEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,21 +33,15 @@ public class Dataplanets
 
         // Register the commonSetup method for modloading
         Compat.loadCompat("gcyr");
-        DPPackets.INSTANCE.messageBuilder(GCYRPacket.class, 0)
-                .encoder(GCYRPacket::encoder)
-                .decoder(GCYRPacket::decoder)
-                .consumerMainThread(GCYRPacket::messageConsumer)
-                .add();
-        DPPackets.INSTANCE.messageBuilder(S2PTranslationPacket.class, 1)
+
+        DPPackets.INSTANCE.messageBuilder(S2PTranslationPacket.class, 0)
                 .encoder(S2PTranslationPacket::encoder)
                 .decoder(S2PTranslationPacket::decoder)
                 .consumerMainThread(S2PTranslationPacket::messageConsumer)
                 .add();
 
-        DPTabs.init();
         DPItems.init();
         DPBlocks.init();
-        Reg.REGISTRATE.registerRegistrate();
 
         MinecraftForge.EVENT_BUS.register(this);
 

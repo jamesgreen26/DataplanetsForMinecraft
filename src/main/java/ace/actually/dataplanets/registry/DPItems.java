@@ -9,7 +9,7 @@ import com.tterrag.registrate.util.entry.ItemEntry;
 public class DPItems {
 
     static {
-        Reg.REGISTRATE.creativeModeTab(() -> DPTabs.TAB);
+        Reg.REGISTRATE.defaultCreativeTab("dataplanets").register();
     }
 
     public static ItemEntry<TheoryItem> THEORY = Reg.REGISTRATE.item("theory", a->new TheoryItem(a,1)).properties((a)->a).lang("Visible Theory").register();

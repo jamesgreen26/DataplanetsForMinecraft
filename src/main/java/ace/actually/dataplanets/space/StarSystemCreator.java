@@ -173,7 +173,10 @@ public class StarSystemCreator {
                 biomeCompound.putInt("waterFogColour",random.nextInt(16777215));
                 biomeCompound.putInt("grassColour",random.nextInt(16777215));
                 biomeCompound.putInt("foliageColour",random.nextInt(16777215));
-
+                biomeCompound.putFloat("temp",random.nextFloat()/2f);
+                biomeCompound.putFloat("humid",random.nextFloat()/2f);
+                biomeCompound.putFloat("erode",random.nextFloat()/2f);
+                biomeCompound.putFloat("wierd",random.nextFloat()/2f);
                 biomeCompound.putString("generalBlock",planetData.getString("generalBlock"));
                 biomeCompound.putInt("temperature",planetData.getInt("temperature")+random.nextInt(-20,20));
                 biomeCompound.put("biome_ores",planetData.getList("planet_ores",ListTag.TAG_STRING));

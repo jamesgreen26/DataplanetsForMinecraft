@@ -1,16 +1,19 @@
 package ace.actually.dataplanets.compat;
 
 import ace.actually.dataplanets.DPPackets;
-import ace.actually.dataplanets.compat.gcyr.GCYRCompat;
-import ace.actually.dataplanets.compat.gtceu.GTCEUCompat;
 import ace.actually.dataplanets.space.S2PTranslationPacket;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -27,10 +30,7 @@ public class Compat {
      */
     public static void modEventBusLoad(IEventBus bus)
     {
-        if(COMPAT_MOD.equals("gcyr"))
-        {
-            GTCEUCompat.doRegister(bus);
-        }
+
     }
 
     /**
@@ -39,18 +39,14 @@ public class Compat {
      */
     public static void postLoadPlanet(CompoundTag planetData)
     {
-        if(COMPAT_MOD.equals("gcyr"))
-        {
-            GCYRCompat.postLoadPlanet(planetData);
-        }
+
     }
 
     public static void loadCompat(String compatmod)
     {
-        if(compatmod.equals("gcyr"))
-        {
-            GCYRCompat.loadCompat();
-        }
+        SURFACE_BLOCKS = new String[]{"minecraft:stone","minecraft:cobblestone","minecraft:end_stone"};
+        SPACE_BIOME = Biomes.END_BARRENS;
+        SPACE_DIMENSION_TYPE = BuiltinDimensionTypes.END;
     }
 
     /**
@@ -60,11 +56,8 @@ public class Compat {
      */
     public static ChunkGenerator spaceGenerator(Holder.Reference<Biome> biomeHolder)
     {
-        if(COMPAT_MOD.equals("gcyr"))
-        {
-            return GCYRCompat.chunkGenerator(biomeHolder);
-        }
-        return null;
+
+        return new NoiseBasedChunkGenerator(new FixedBiomeSource(biomeHolder),Holder.direct(NoiseGeneratorSettings.dummy()));
     }
 
     /**
@@ -72,10 +65,6 @@ public class Compat {
      */
     public static void postLoadWorld()
     {
-        if(COMPAT_MOD.equals("gcyr"))
-        {
-            GCYRCompat.postLoadWorld();
-        }
         DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PTranslationPacket(StarSystemCreator.getDynamicDataOrNew()));
     }
 }

@@ -1,11 +1,11 @@
 package ace.actually.dataplanets.registry;
 
 import ace.actually.dataplanets.Dataplanets;
-import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate;
+import com.tterrag.registrate.Registrate;
 
 public class Reg {
 
-    public static final GTRegistrate REGISTRATE = GTRegistrate.create(Dataplanets.MODID);
+    public static final Registrate REGISTRATE = Registrate.create(Dataplanets.MODID);
 
 
 }

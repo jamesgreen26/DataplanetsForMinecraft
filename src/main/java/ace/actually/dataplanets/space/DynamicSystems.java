@@ -529,6 +529,9 @@ public class DynamicSystems {
         Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDimType(planetData));
         if(!LEVEL_STEMS.containsKey(resourcekey))
         {
+
+            Holder<NormalNoise.NoiseParameters> OFFSET = NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","offset")));
+
             NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
                     NoiseSettings.create(-64, 384, 2, 2),
                     BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState(),
@@ -538,12 +541,32 @@ public class DynamicSystems {
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0),
                             DensityFunctions.constant(0),
+                            DensityFunctions.shiftedNoise2d(
+                                    DensityFunctions.shiftA(OFFSET),
+                                    DensityFunctions.shiftB(OFFSET),
+                                    0.25F,
+                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","temperature")))
+                                    ),
+                            DensityFunctions.shiftedNoise2d(
+                                    DensityFunctions.shiftA(OFFSET),
+                                    DensityFunctions.shiftB(OFFSET),
+                                    0.25F,
+                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","vegetation")))
+                            ),
                             DensityFunctions.constant(0),
+                            DensityFunctions.shiftedNoise2d(
+                                    DensityFunctions.shiftA(OFFSET),
+                                    DensityFunctions.shiftB(OFFSET),
+                                    0.25F,
+                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","erosion")))
+                            ),
                             DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
+                            DensityFunctions.shiftedNoise2d(
+                                    DensityFunctions.shiftA(OFFSET),
+                                    DensityFunctions.shiftB(OFFSET),
+                                    0.25F,
+                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","ridge")))
+                            ),
                             DensityFunctions.constant(0),
                             DensityFunctions.add(
                                     DensityFunctions.yClampedGradient(-64,320,1,-1),
@@ -564,16 +587,17 @@ public class DynamicSystems {
             List<Pair<Climate.ParameterPoint,Holder<Biome>>> biomes = new ArrayList<>();
             ListTag biomesTag = planetData.getList("biomes",ListTag.TAG_COMPOUND);
             for (int i = 0; i < biomesTag.size(); i++) {
+                CompoundTag b = biomesTag.getCompound(i);
                 biomes.add(new Pair<>(
                         new Climate.ParameterPoint(
+                                Climate.Parameter.point(b.getFloat("temp")),
+                                Climate.Parameter.point(b.getFloat("humid")),
                                 Climate.Parameter.point(1),
+                                Climate.Parameter.point(b.getFloat("erode")),
                                 Climate.Parameter.point(1),
-                                Climate.Parameter.point(1),
-                                Climate.Parameter.point(1),
-                                Climate.Parameter.point(1),
-                                Climate.Parameter.point(1),
-                                1
-                        ),BIOMES.getHolderOrThrow(makeBiome(biomesTag.getCompound(i)))));
+                                Climate.Parameter.point(b.getFloat("wierd")),
+                                0
+                        ),BIOMES.getHolderOrThrow(makeBiome(b))));
             }
 
             MultiNoiseBiomeSource n = MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(biomes));
