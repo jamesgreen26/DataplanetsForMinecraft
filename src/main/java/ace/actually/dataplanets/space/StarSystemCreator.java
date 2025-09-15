@@ -51,13 +51,16 @@ public class StarSystemCreator {
         rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2);
         langFile.append(rebuild).append("\",");
 
+        boolean MAKE_PLANET_LIVABLE = true;
+        //TODO; change hasAtmosphere and hasOxygen back to random.nextInt(4)==0
+
         for (int i = 0; i < systemData.getInt("planets"); i++) {
             CompoundTag planetData = new CompoundTag();
             String subname = CODE[i];
             String planetName = systemName+subname;
             planetData.putString("name",planetName);
             planetData.putFloat("gravity",(float)random.nextInt(1500)/100f);
-            planetData.putBoolean("hasAtmosphere",random.nextInt(4)==0);
+            planetData.putBoolean("hasAtmosphere",MAKE_PLANET_LIVABLE);
             planetData.putInt("yearDays",random.nextInt(1,1000));
 
 
@@ -87,7 +90,7 @@ public class StarSystemCreator {
             //nicely, a planet with temperature 401 has a chance of getting 20 (still 1-20 however)
             planetData.putInt("solarPower",random.nextInt((planetData.getInt("temperature")/15)+1));
 
-            planetData.putBoolean("hasOxygen",random.nextInt(4)==0);
+            planetData.putBoolean("hasOxygen",MAKE_PLANET_LIVABLE);
 
             String effects;
             if(planetData.getBoolean("hasAtmosphere"))
@@ -152,6 +155,8 @@ public class StarSystemCreator {
             genOre(random,uuid,planetData);
 
 
+
+
             planetData.putFloat("nr1", (float) random.nextInt(1800) /1000f);
             planetData.putFloat("nr2", (float) random.nextInt(2000) /1000f);
             planetData.putFloat("nr3", (float) random.nextInt(2000) /1000f);
@@ -184,6 +189,21 @@ public class StarSystemCreator {
                 biomeCompound.put("lakeFluids",planetData.getList("lakeFluids",ListTag.TAG_STRING));
                 biomeCompound.putByteArray("flavour",planetData.getByteArray("flavour"));
                 biomeCompound.putString("name",planetData.getString("name")+random.nextInt(10000));
+                if(random.nextInt(10)==0)
+                {
+                    if(planetData.getBoolean("hasAtmosphere") && planetData.getBoolean("hasOxygen"))
+                    {
+                        biomeCompound.putString("treeTrunk","minecraft:oak_log");
+                        biomeCompound.putString("treeLeaves","minecraft:oak_leaves");
+                    }
+                    else
+                    {
+                        biomeCompound.putString("treeTrunk","minecraft:blackstone");
+                        biomeCompound.putString("treeLeaves","minecraft:basalt");
+                    }
+                }
+
+
                 biomeList.add(biomeCompound);
             }
 

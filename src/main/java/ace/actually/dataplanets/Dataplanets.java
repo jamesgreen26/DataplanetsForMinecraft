@@ -3,6 +3,7 @@ package ace.actually.dataplanets;
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.registry.*;
 import ace.actually.dataplanets.space.S2PTranslationPacket;
+import net.minecraft.tags.BlockTags;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

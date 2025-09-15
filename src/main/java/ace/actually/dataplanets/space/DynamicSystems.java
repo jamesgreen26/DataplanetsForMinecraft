@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Carvers;
@@ -22,6 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -32,6 +35,7 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -40,7 +44,14 @@ import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
+import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.*;
@@ -176,6 +187,14 @@ public class DynamicSystems {
         {
             builder.addFeature(0,pointed_dripstone);
         }
+        if(biomeData.contains("treeTrunk"))
+        {
+            List<ResourceKey<PlacedFeature>> features = makeTreeLike(biomeData);
+            for(ResourceKey<PlacedFeature> feature: features)
+            {
+                builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
+            }
+        }
 
 
         List<ResourceKey<PlacedFeature>> features = makeOres(biomeData);
@@ -260,6 +279,56 @@ public class DynamicSystems {
         }
 
         return dimKey;
+    }
+    public static List<ResourceKey<PlacedFeature>> makeTreeLike(CompoundTag biomeData)
+    {
+        List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
+        ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_tree"));
+        ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_tree"));
+        if(!PLACED_FEATURES.containsKey(placedKey))
+        {
+
+            BlockState trunkState = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(biomeData.getString("treeTrunk"))).defaultBlockState();
+            BlockState leafState = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(biomeData.getString("treeLeaves"))).defaultBlockState();
+
+
+            TreeConfiguration configuration = new TreeConfiguration.TreeConfigurationBuilder(
+                    BlockStateProvider.simple(trunkState),
+                    new FancyTrunkPlacer(4,2,0),
+                    BlockStateProvider.simple(leafState),
+                    new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.ZERO, 3),
+                    Optional.empty(),
+                    new TwoLayersFeatureSize(1,0,1)).build();
+
+            ConfiguredFeature<?,?> feature = new ConfiguredFeature<>(Feature.TREE,configuration);
+
+
+
+            ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(false);
+            ((MappedRegistry<ConfiguredFeature<?,?>>) CONFIGURED_FEATURES).register(
+                    configuredKey,
+                    feature,
+                    Lifecycle.stable() // use built-in registration info for now
+            );
+            ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(true);
+
+            List<PlacementModifier> modifiers = new ArrayList<>();
+            modifiers.add(BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(Blocks.OAK_SAPLING.defaultBlockState(), Vec3i.ZERO)));
+
+            PlacedFeature placedFeature = new PlacedFeature(CONFIGURED_FEATURES.getHolderOrThrow(configuredKey),modifiers);
+
+
+
+            ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(false);
+            ((MappedRegistry<PlacedFeature>) PLACED_FEATURES).register(
+                    placedKey,
+                    placedFeature,
+                    Lifecycle.stable() // use built-in registration info for now
+            );
+            ((IUnfreezableRegistry) PLACED_FEATURES).setRegFrozen(true);
+            features.add(placedKey);
+        }
+        return features;
     }
 
     public static List<ResourceKey<PlacedFeature>> makeDelta(CompoundTag biomeData)
@@ -461,7 +530,8 @@ public class DynamicSystems {
         builder.add(SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), SurfaceRules.state(Blocks.BEDROCK.defaultBlockState())));
         if(hasLife)
         {
-            builder.add(SurfaceRules.ifTrue(SurfaceRules.waterBlockCheck(0, 0),SurfaceRules.state(Blocks.GRASS_BLOCK.defaultBlockState())));
+            //builder.add(SurfaceRules.ifTrue(SurfaceRules.waterBlockCheck(0, 0),SurfaceRules.state(Blocks.GRASS_BLOCK.defaultBlockState())));
+            builder.add(SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR,SurfaceRules.state(Blocks.GRASS_BLOCK.defaultBlockState())));
         }
 
         return SurfaceRules.sequence(builder.build().toArray(SurfaceRules.RuleSource[]::new));

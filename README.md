@@ -1,28 +1,28 @@
 # Dataplanets
-A mod that uses slightly cursed ~~datapack generation (right now)~~ registry manipulation to add infinite planets to GCYR (right now)
+A mod that uses slightly cursed registry manipulation to add infinite planets to space mods
 
 # The Plan
 - :green_circle: Rocky terrestrial planets
 - :green_circle: (Rocky) sea planets
-- :orange_circle: Research System
 - :orange_circle: Stars
 - :orange_circle: Gas Giants
+  - Stars and gas giants are currently implemented the exact same way; A bedrock layer, 50 lava, 50 dense gas
+  - This is basically finished, I just want to add flares/plumes at some point
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
   - :red_circle: Terrestrial Creatures
-- :orange_circle: Space stations 
-- :red_circle: Story Events
-- :red_circle: Space factions
-- ~~Space navigation~~
-  - ~~Rockets (uses GCYR)~~
-  - ~~Starships~~
+- :orange_circle: Space Stations
+  - In this version, space stations will likely be supplied external
+  - There is a basic implementation of modular space stations in this project
+- :red_circle: Space Factions
+  - Three factions are planned
 
-# Notice
-- This mod was originally made for 1.21 as originally posted on the GTCEU discord
-- Originally the plan was to make an independent mod that adds universal content to every space mod, this is still the plan for this project
-- This mod currently relies on GCYR, eventually it will be universal (I hope)
-- eventually this mod may not depend on GTCEU, however I thought it was better to work with a base tech mod first
-  - this is also because it means I can add lakes of cool fluids from GTCEU
+# Things this version won't add
+- Space Transportation
+  - Space Transportation is usually handled externally with something like GCYR or Genesis
+- Research System
+  - Some mods would require a research system to have tangible progression to reach new systems
+  - This is partially implemented for GCYR, but not needed for Genesis
 
 This project is made with help and inspiration from team GTIC (more about them to come)
 
