@@ -5,17 +5,19 @@ A mod that uses slightly cursed registry manipulation to add infinite planets to
 - :green_circle: Rocky terrestrial planets
 - :green_circle: (Rocky) sea planets
 - :orange_circle: Stars
-- :orange_circle: Gas Giants
+- :orange_circle:/:green_circle: Gas Giants
   - Stars and gas giants are currently implemented the exact same way; A bedrock layer, 50 lava, 50 dense gas
   - This is basically finished, I just want to add flares/plumes at some point
+- :red_circle: Space Factions
+  - Three factions are planned
+- :orange_circle: Questing System
+  - A simple task-return-reward system has been implemented
+- :orange_circle: Radio System
+  - a system used to exchange data (locations, atmospheric conditions, news, distress signals) through the cosmos
+  - A detailed specification can be seen at the top of the `RadioSpec` class
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
   - :red_circle: Terrestrial Creatures
-- :orange_circle: Space Stations
-  - In this version, space stations will likely be supplied external
-  - There is a basic implementation of modular space stations in this project
-- :red_circle: Space Factions
-  - Three factions are planned
 
 # Things this version won't add
 - Space Transportation
@@ -23,6 +25,9 @@ A mod that uses slightly cursed registry manipulation to add infinite planets to
 - Research System
   - Some mods would require a research system to have tangible progression to reach new systems
   - This is partially implemented for GCYR, but not needed for Genesis
+- Space Stations
+    - In this version, space stations will likely be supplied external
+    - There is a basic implementation of modular space stations in this project
 
 This project is made with help and inspiration from team GTIC (more about them to come)
 
