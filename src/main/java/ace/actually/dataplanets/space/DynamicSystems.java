@@ -23,9 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.valueproviders.ConstantInt;
-import net.minecraft.util.valueproviders.IntProviderType;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.valueproviders.*;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
@@ -51,6 +50,7 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlac
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
@@ -143,7 +143,7 @@ public class DynamicSystems {
                             .waterColor(biomeData.getInt("waterColour"))
                             .waterFogColor(biomeData.getInt("waterFogColour"))
                             .grassColorOverride(biomeData.getInt("grassColour"))
-                            .foliageColorOverride(biomeData.getInt("foliage")).build())
+                            .foliageColorOverride(biomeData.getInt("foliageColour")).build())
                     .mobSpawnSettings(new MobSpawnSettings.Builder().build())
                     .generationSettings(builder(new BiomeGenerationSettingsBuilder(BiomeGenerationSettings.EMPTY),biomeData).build()).build();
 
@@ -294,7 +294,7 @@ public class DynamicSystems {
 
             TreeConfiguration configuration = new TreeConfiguration.TreeConfigurationBuilder(
                     BlockStateProvider.simple(trunkState),
-                    new FancyTrunkPlacer(4,2,0),
+                    new StraightTrunkPlacer(4,2,0),
                     BlockStateProvider.simple(leafState),
                     new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.ZERO, 3),
                     Optional.empty(),
@@ -313,7 +313,13 @@ public class DynamicSystems {
             ((IUnfreezableRegistry) CONFIGURED_FEATURES).setRegFrozen(true);
 
             List<PlacementModifier> modifiers = new ArrayList<>();
-            modifiers.add(BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(Blocks.OAK_SAPLING.defaultBlockState(), Vec3i.ZERO)));
+            SimpleWeightedRandomList<IntProvider> weight = SimpleWeightedRandomList.<IntProvider>builder()
+                    .add(ConstantInt.of(0),19)
+                    .add(ConstantInt.of(1),1).build();
+            modifiers.add(CountPlacement.of(new WeightedListInt(weight)));
+            modifiers.add(InSquarePlacement.spread());
+            modifiers.add(SurfaceWaterDepthFilter.forMaxDepth(0));
+            modifiers.add(HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR));
 
             PlacedFeature placedFeature = new PlacedFeature(CONFIGURED_FEATURES.getHolderOrThrow(configuredKey),modifiers);
 
