@@ -134,9 +134,9 @@ public class DynamicSystems {
         if(!BIOMES.containsKey(biomeKey))
         {
             Biome biome = new Biome.BiomeBuilder()
-                    .downfall(0)
-                    .temperature(0.93f)
-                    .hasPrecipitation(false)
+                    .downfall(biomeData.getFloat("downfall"))
+                    .temperature(biomeData.getFloat("climate"))
+                    .hasPrecipitation(biomeData.getBoolean("hasRain"))
                     .specialEffects(new BiomeSpecialEffects.Builder()
                             .skyColor(biomeData.getInt("skyColour"))
                             .fogColor(biomeData.getInt("fogColour"))
@@ -481,15 +481,15 @@ public class DynamicSystems {
         return features;
     }
 
-    public static List<ResourceKey<PlacedFeature>> makeRocks(CompoundTag planetData)
+    public static List<ResourceKey<PlacedFeature>> makeRocks(CompoundTag biomeData)
     {
         List<ResourceKey<PlacedFeature>> features = new ArrayList<>();
-        if(planetData.contains("rock_blocks"))
+        if(biomeData.contains("rock_blocks"))
         {
-            ListTag rocks = (ListTag) planetData.get("rock_blocks");
+            ListTag rocks = (ListTag) biomeData.get("rock_blocks");
             for (int i = 0; i < rocks.size(); i++) {
-                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_rock_"+i));
-                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_rock_"+i));
+                ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(CONFIGURED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_rock_"+i));
+                ResourceKey<PlacedFeature> placedKey = ResourceKey.create(PLACED_FEATURES.key(),ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_rock_"+i));
                 if(!PLACED_FEATURES.containsKey(placedKey))
                 {
                     BlockState rock = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(rocks.getString(i))).defaultBlockState();

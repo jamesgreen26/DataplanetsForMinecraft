@@ -44,7 +44,7 @@ public class Compat {
 
     public static void loadCompat(String compatmod)
     {
-        SURFACE_BLOCKS = new String[]{"minecraft:stone","minecraft:cobblestone","minecraft:end_stone"};
+        SURFACE_BLOCKS = new String[]{"minecraft:stone","minecraft:cobblestone","minecraft:end_stone","minecraft:netherrack","minecraft:blackstone","minecraft:sandstone","minecraft:red_sandstone","minecraft:basalt"};
         SPACE_BIOME = Biomes.END_BARRENS;
         SPACE_DIMENSION_TYPE = BuiltinDimensionTypes.END;
     }

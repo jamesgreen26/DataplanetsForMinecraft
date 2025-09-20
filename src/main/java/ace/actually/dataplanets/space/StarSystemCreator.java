@@ -105,7 +105,14 @@ public class StarSystemCreator {
             planetData.putString("effects",effects);
 
 
-            planetData.putString("generalBlock", Compat.SURFACE_BLOCKS[random.nextInt(Compat.SURFACE_BLOCKS.length)]);
+            if(planetData.getInt("temperature")>600)
+            {
+                planetData.putString("generalBlock", "minecraft:magma_block");
+            }
+            else
+            {
+                planetData.putString("generalBlock", Compat.SURFACE_BLOCKS[random.nextInt(Compat.SURFACE_BLOCKS.length)]);
+            }
 
 
             if(planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0)
@@ -149,7 +156,7 @@ public class StarSystemCreator {
             }
             planetData.putByteArray("flavour",flavour);
 
-            //shouldGenDripstone(planetData,random);
+            //TODO: this could be moved to biomeCompound
             genLakes(planetData,uuid,random);
             genRocks(planetData,uuid,random);
             genOre(random,uuid,planetData);
@@ -167,11 +174,23 @@ public class StarSystemCreator {
 
             planetData.putInt("seaLevel",random.nextInt(63,210));
 
+
             ListTag biomeList = new ListTag();
             for (int j = 0; j < 3; j++) {
 
                 CompoundTag biomeCompound = new CompoundTag();
-
+                biomeCompound.putFloat("downfall",random.nextFloat());
+                biomeCompound.putBoolean("hasRain", planetData.getBoolean("hasAtmosphere") && random.nextInt(5)==0);
+                if(planetData.getBoolean("hasAtmosphere"))
+                {
+                    int offsetTemp = planetData.getInt("temperature")-(random.nextInt(450,550));
+                    biomeCompound.putFloat("climate",(offsetTemp)/500f);
+                }
+                else
+                {
+                    int offsetTemp = planetData.getInt("temperature")-(random.nextInt(400,600));
+                    biomeCompound.putFloat("climate",(offsetTemp)/500f);
+                }
                 biomeCompound.putInt("skyColour",random.nextInt(16777215));
                 biomeCompound.putInt("fogColour",random.nextInt(16777215));
                 biomeCompound.putInt("waterColour",random.nextInt(16777215));
@@ -252,12 +271,10 @@ public class StarSystemCreator {
         }
     }
 
-    private static String genOre(RandomSource random,String uuid,CompoundTag planetData)
+    private static void genOre(RandomSource random, String uuid, CompoundTag planetData)
     {
 
-        ResourceLocation[] candidate = BuiltInRegistries.BLOCK.keySet().stream().filter(a->a.getPath().contains("_ore")).toArray(ResourceLocation[]::new);
-        ResourceLocation orerl = candidate[random.nextInt(candidate.length)];
-        String ore = orerl.toString();
+
         ListTag ores;
         if(planetData.contains("planet_ores"))
         {
@@ -267,47 +284,18 @@ public class StarSystemCreator {
         {
             ores = new ListTag();
         }
-        ores.add(StringTag.valueOf(ore));
-        planetData.put("planet_ores",ores);
-        String reform = ore.replace(":","_");
+        for (int i = 0; i < random.nextInt(1,5); i++) {
+            ResourceLocation[] candidate = BuiltInRegistries.BLOCK.keySet().stream().filter(a->a.getPath().contains("_ore")).toArray(ResourceLocation[]::new);
+            ResourceLocation orerl = candidate[random.nextInt(candidate.length)];
+            String ore = orerl.toString();
+            ores.add(StringTag.valueOf(ore));
+            planetData.put("planet_ores",ores);
+        }
 
-        return ",\""+"dataplanets:ORE\"".replace("ORE",reform);
     }
 
-
-
-    private static String shouldGenDripstone(CompoundTag planetData,RandomSource source)
+    private static void genLakes(CompoundTag planetData, String uuid, RandomSource randomSource)
     {
-        //\"minecraft:large_dripstone\",\n" +
-        //                    "      \"minecraft:dripstone_cluster\",\n" +
-        //                    "      \"minecraft:pointed_dripstone\"\n" +
-        StringBuilder stringBuilder = new StringBuilder();
-        if(source.nextInt(5)==0)
-        {
-            stringBuilder.append("\"minecraft:dripstone_cluster\",\n");
-
-        }
-        if(source.nextInt(5)==0)
-        {
-            stringBuilder.append("\"minecraft:large_dripstone\",\n");
-        }
-        if(source.nextInt(5)==0)
-        {
-            stringBuilder.append("\"minecraft:pointed_dripstone\",\n");
-        }
-        String v = stringBuilder.toString();
-
-        if(v.isEmpty()) return "";
-        return v.substring(0,v.length()-1);
-    }
-
-
-
-    private static String genLakes(CompoundTag planetData, String uuid, RandomSource randomSource)
-    {
-        StringBuilder features = new StringBuilder();
-
-
         for (int i = 0; i < 1; i++) {
 
             List<Fluid> materials = BuiltInRegistries.FLUID.stream().filter(a->
@@ -366,13 +354,11 @@ public class StarSystemCreator {
         }
 
 
-
-        return features.toString();
     }
-    private static String genRocks(CompoundTag planetData, String uuid, RandomSource randomSource)
+    private static void genRocks(CompoundTag planetData, String uuid, RandomSource randomSource)
     {
-        StringBuilder features = new StringBuilder();
-        String matName = Compat.SURFACE_BLOCKS[randomSource.nextInt(Compat.SURFACE_BLOCKS.length)];
+
+
 
         ListTag rocks;
         if(planetData.contains("rock_blocks"))
@@ -383,14 +369,16 @@ public class StarSystemCreator {
         {
             rocks = new ListTag();
         }
-        rocks.add(StringTag.valueOf(matName));
+        for (int i = 0; i < randomSource.nextInt(1,4); i++) {
+            String matName = Compat.SURFACE_BLOCKS[randomSource.nextInt(Compat.SURFACE_BLOCKS.length)];
+            rocks.add(StringTag.valueOf(matName));
+        }
+
 
 
         planetData.put("rock_blocks",rocks);
 
 
-
-        return features.toString();
     }
 
     static boolean writeCond = false;
