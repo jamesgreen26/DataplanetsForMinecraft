@@ -1,7 +1,7 @@
 package ace.actually.dataplanets.compat;
 
 import ace.actually.dataplanets.DPPackets;
-import ace.actually.dataplanets.space.S2PTranslationPacket;
+import ace.actually.dataplanets.space.S2PSyncPacket;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -65,6 +65,6 @@ public class Compat {
      */
     public static void postLoadWorld()
     {
-        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PTranslationPacket(StarSystemCreator.getDynamicDataOrNew()));
+        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PSyncPacket(StarSystemCreator.getDynamicDataOrNew()));
     }
 }

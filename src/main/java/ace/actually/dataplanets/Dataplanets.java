@@ -2,8 +2,7 @@ package ace.actually.dataplanets;
 
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.registry.*;
-import ace.actually.dataplanets.space.S2PTranslationPacket;
-import net.minecraft.tags.BlockTags;
+import ace.actually.dataplanets.space.S2PSyncPacket;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,12 +32,12 @@ public class Dataplanets
 
 
         // Register the commonSetup method for modloading
-        Compat.loadCompat("gcyr");
+        Compat.loadCompat("genesis");
 
-        DPPackets.INSTANCE.messageBuilder(S2PTranslationPacket.class, 0)
-                .encoder(S2PTranslationPacket::encoder)
-                .decoder(S2PTranslationPacket::decoder)
-                .consumerMainThread(S2PTranslationPacket::messageConsumer)
+        DPPackets.INSTANCE.messageBuilder(S2PSyncPacket.class, 0)
+                .encoder(S2PSyncPacket::encoder)
+                .decoder(S2PSyncPacket::decoder)
+                .consumerMainThread(S2PSyncPacket::messageConsumer)
                 .add();
 
         DPItems.init();

@@ -78,6 +78,7 @@ public class DynamicSystems {
     public static Registry<LevelStem> LEVEL_STEMS = null;
     public static Registry<NormalNoise.NoiseParameters> NOISE = null;
     public static Map<String,String> TRANSLATIONS = new HashMap<>();
+    public static Map<String,float[]> RAIN_COLOUR = new HashMap<>();
     public static int frozeTimes = 0;
 
     /**
@@ -253,7 +254,7 @@ public class DynamicSystems {
                     OptionalLong.empty(),
                     planetData.getInt("solarPower")>3,
                     false,
-                    planetData.getInt("temperature")>400,
+                    planetData.getInt("temperature")>600,
                     true,
                     1,
                     true,
