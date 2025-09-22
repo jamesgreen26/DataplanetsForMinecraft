@@ -4,10 +4,15 @@ import ace.actually.dataplanets.Dataplanets;
 import ace.actually.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,13 +36,11 @@ import java.util.Set;
 @Mixin(LivingEntity.class)
 public abstract class ServerPlayerMixin extends Entity {
 
-    @Shadow @Final private AttributeMap attributes;
-
-    @Shadow public abstract RandomSource getRandom();
-
     @Shadow @Nullable public abstract AttributeInstance getAttribute(Attribute p_21052_);
 
-    @Shadow public abstract void die(DamageSource p_21014_);
+
+    @Shadow
+    public abstract boolean addEffect(MobEffectInstance p_21165_);
 
     public ServerPlayerMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -46,9 +49,9 @@ public abstract class ServerPlayerMixin extends Entity {
     @Inject(method = "tick", at = @At("TAIL"))
     private void checkKey(CallbackInfo ci)
     {
+        AttributeInstance gravity = this.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
         if(this.level().dimension().location().getNamespace().equals("dataplanets"))
         {
-            AttributeInstance gravity = this.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
             if(gravity!=null)
             {
                 String name = this.level().dimension().location().getPath();
@@ -64,6 +67,27 @@ public abstract class ServerPlayerMixin extends Entity {
                 else
                 {
                     gravity.removeModifier(modifier);
+                }
+                if(!planetData.getBoolean("hasAtmosphere") || !planetData.getBoolean("hasOxygen"))
+                {
+                    if(!getTags().contains("has_oxygen"))
+                    {
+                        addEffect(new MobEffectInstance(MobEffects.WITHER));
+                    }
+                }
+                if(planetData.getInt("temperature")<263)
+                {
+                    if(!getTags().contains("has_heat"))
+                    {
+                        setTicksFrozen(20);
+                    }
+                }
+                if(planetData.getInt("temperature")>313)
+                {
+                    if(!getTags().contains("has_cooling"))
+                    {
+                        setRemainingFireTicks(20);
+                    }
                 }
 
             }
@@ -90,7 +114,6 @@ public abstract class ServerPlayerMixin extends Entity {
         }
         else
         {
-            AttributeInstance gravity = this.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
             if(gravity!=null)
             {
                 gravity.removeModifier(Dataplanets.LOW_GRAVITY);

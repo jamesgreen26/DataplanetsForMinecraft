@@ -292,7 +292,7 @@ public class DynamicSystems {
             BlockState trunkState = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(biomeData.getString("treeTrunk"))).defaultBlockState();
             BlockState leafState = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(biomeData.getString("treeLeaves"))).defaultBlockState();
 
-
+            //TODO: Could probably add other tree variants
             TreeConfiguration configuration = new TreeConfiguration.TreeConfigurationBuilder(
                     BlockStateProvider.simple(trunkState),
                     new StraightTrunkPlacer(4,2,0),

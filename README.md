@@ -12,14 +12,16 @@ A mod that uses slightly cursed registry manipulation to add infinite planets to
   - Three factions are planned
 - :orange_circle: Questing System
   - A simple task-return-reward system has been implemented
-- :orange_circle: Radio System
-  - a system used to exchange data (locations, atmospheric conditions, news, distress signals) through the cosmos
-  - A detailed specification can be seen at the top of the `RadioSpec` class
+- :orange_circle: Radio Integration
+  - A way of connecting the cosmos together, like being able to ping weather stations for information
+- :orange_circle: Atmospheric and Temperature Effects
+  - if it is too hot, too cold, or does not have an atmosphere and oxygen then effects occur
+  - (in this commit there is no way to mitigate these effects)
 - :red_circle: Creatures
   - :red_circle: Sea Creatures
   - :red_circle: Terrestrial Creatures
 
-# Things this version won't add
+# Things this version won't add or are in another mod
 - Space Transportation
   - Space Transportation is usually handled externally with something like GCYR or Genesis
 - Research System
@@ -28,6 +30,8 @@ A mod that uses slightly cursed registry manipulation to add infinite planets to
 - Space Stations
     - In this version, space stations will likely be supplied external
     - There is a basic implementation of modular space stations in this project
+- Radio System
+  - Now handled in a separate mod see [This github repo](https://github.com/JSJBDEV/Radios)
 
 This project is made with help and inspiration from team GTIC (more about them to come)
 

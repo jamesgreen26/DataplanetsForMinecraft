@@ -1,5 +1,6 @@
 package ace.actually.dataplanets.factions;
 
+import ace.actually.dataplanets.MutableTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -31,18 +32,39 @@ public class Questable {
         List<ResourceKey<Level>> levels = server.levelKeys().stream().toList();
         ResourceKey<Level> levelKey = levels.get(server.overworld().random.nextInt(levels.size()));
         ServerLevel level = server.getLevel(levelKey);
+        BlockPos place = level.findNearestMapStructure(MutableTags.QUEST_STRUCTURES,BlockPos.ZERO,10000,true);
 
-        //TODO: add a locateStructure to some structure that may exist on any planet
-        return "visit "+levelKey.location()+" ";
+        return "visit "+levelKey.location()+" "+place.getX()+" "+place.getY()+" "+place.getZ();
     }
     public static String collectItems(MinecraftServer server)
     {
-        //TODO: make an item tag of collectibles that may be found on various planets
-        ItemStack stack = new ItemStack(Items.STICK,32);
+        Item f = BuiltInRegistries.ITEM.stream().filter(a->new ItemStack(a).is(MutableTags.QUEST_ITEMS)).findAny().get();
+        ItemStack stack = new ItemStack(f,server.overworld().random.nextInt(1,128));
         return "collect "+BuiltInRegistries.ITEM.getKey(stack.getItem())+" "+stack.getCount();
     }
 
-    //TODO: Should be called from somewhere semi-frequently
+    public static String randomQuest(MinecraftServer server)
+    {
+        return switch (server.overworld().random.nextInt(2))
+        {
+            case 0 -> visitLocation(server);
+            case 1 -> collectItems(server);
+            default -> "Unreachable, theoretically, but I had to make a default case";
+        };
+    }
+
+    public static void randomQuestToPlayer(ServerPlayer spe)
+    {
+        CompoundTag quests = spe.server.getCommandStorage().get(QUESTING);
+        CompoundTag player = quests.getCompound(spe.getStringUUID());
+        player.putString("task",randomQuest(spe.server));
+        player.putString("return",randomQuest(spe.server));
+
+        quests.put(spe.getStringUUID(),player);
+        spe.server.getCommandStorage().set(QUESTING,quests);
+
+    }
+
     public static void interpret(ServerPlayer spe, String string)
     {
         CompoundTag quests = spe.server.getCommandStorage().get(QUESTING);
@@ -53,7 +75,7 @@ public class Questable {
             String[] split = string.split(" ");
             if(spe.serverLevel().dimension()==ResourceKey.create(Registries.DIMENSION,ResourceLocation.parse(split[1])))
             {
-                BlockPos pos = new BlockPos(Integer.parseInt(split[2]),Integer.parseInt(split[3]),Integer.parseInt(split[4]));
+                BlockPos pos = new BlockPos(Integer.parseInt(split[2]),spe.getBlockY(),Integer.parseInt(split[4]));
                 if(spe.getOnPos().distSqr(pos)<100)
                 {
                     updateQuest(spe);

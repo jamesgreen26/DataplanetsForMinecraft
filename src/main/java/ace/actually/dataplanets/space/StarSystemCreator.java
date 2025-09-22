@@ -51,8 +51,6 @@ public class StarSystemCreator {
         rebuild = rebuild.substring(0,2)+" "+rebuild.substring(2);
         langFile.append(rebuild).append("\",");
 
-        boolean MAKE_PLANET_LIVABLE = true;
-        //TODO; change hasAtmosphere and hasOxygen back to random.nextInt(4)==0
 
         for (int i = 0; i < systemData.getInt("planets"); i++) {
             CompoundTag planetData = new CompoundTag();
@@ -60,7 +58,7 @@ public class StarSystemCreator {
             String planetName = systemName+subname;
             planetData.putString("name",planetName);
             planetData.putFloat("gravity",(float)random.nextInt(1500)/100f);
-            planetData.putBoolean("hasAtmosphere",MAKE_PLANET_LIVABLE);
+            planetData.putBoolean("hasAtmosphere",random.nextInt(4)==0);
             planetData.putInt("yearDays",random.nextInt(1,1000));
 
 
@@ -90,7 +88,7 @@ public class StarSystemCreator {
             //nicely, a planet with temperature 401 has a chance of getting 20 (still 1-20 however)
             planetData.putInt("solarPower",random.nextInt((planetData.getInt("temperature")/15)+1));
 
-            planetData.putBoolean("hasOxygen",MAKE_PLANET_LIVABLE);
+            planetData.putBoolean("hasOxygen",random.nextInt(4)==0);
 
             String effects;
             if(planetData.getBoolean("hasAtmosphere"))
