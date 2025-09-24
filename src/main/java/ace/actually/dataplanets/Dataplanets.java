@@ -3,8 +3,13 @@ package ace.actually.dataplanets;
 import ace.actually.dataplanets.compat.Compat;
 import ace.actually.dataplanets.registry.*;
 import ace.actually.dataplanets.space.S2PSyncPacket;
+import ace.actually.dataplanets.space.StarSystemCreator;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -56,6 +61,29 @@ public class Dataplanets
     public void playerLogsIn(PlayerEvent.PlayerLoggedInEvent event)
     {
         Compat.postLoadWorld();
+    }
+
+    @SubscribeEvent
+    public void place(BlockEvent.EntityPlaceEvent event)
+    {
+        if(event.getPlacedBlock().is(Blocks.TORCH) && event.getPlacedBlock().is(Blocks.WALL_TORCH))
+        {
+            if(event.getLevel() instanceof Level level)
+            {
+                if(level.dimension().location().getNamespace().equals("dataplanets"))
+                {
+                    String name = level.dimension().location().getPath();
+                    CompoundTag data = StarSystemCreator.getDynamicDataOrNew();
+                    CompoundTag planetData = data.getCompound(name.substring(0,name.length()-1)).getCompound(name);
+                    if(planetData.getBoolean("hasOxygen"))
+                    {
+                        event.setCanceled(true);
+                    }
+
+                }
+            }
+        }
+
     }
 
 

@@ -2,6 +2,7 @@ package ace.actually.dataplanets.mixin;
 
 import ace.actually.dataplanets.Dataplanets;
 import ace.actually.dataplanets.space.StarSystemCreator;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,12 +16,16 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraftforge.common.ForgeMod;
 import org.spongepowered.asm.mixin.Final;
@@ -29,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -45,6 +51,20 @@ public abstract class ServerPlayerMixin extends Entity {
     public ServerPlayerMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
     }
+
+    @Inject(method = "equipmentHasChanged", at = @At("TAIL"))
+    private void equip(ItemStack oldItem, ItemStack newItem, CallbackInfoReturnable<Boolean> cir)
+    {
+        if(oldItem.is(Items.LEATHER_HELMET))
+        {
+            removeTag("has_oxygen");
+        }
+        if(newItem.is(Items.LEATHER_HELMET))
+        {
+            addTag("has_oxygen");
+        }
+    }
+
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void checkKey(CallbackInfo ci)
@@ -68,27 +88,31 @@ public abstract class ServerPlayerMixin extends Entity {
                 {
                     gravity.removeModifier(modifier);
                 }
-                if(!planetData.getBoolean("hasAtmosphere") || !planetData.getBoolean("hasOxygen"))
+                if(!isInvulnerable())
                 {
-                    if(!getTags().contains("has_oxygen"))
+                    if(!planetData.getBoolean("hasAtmosphere") || !planetData.getBoolean("hasOxygen"))
                     {
-                        addEffect(new MobEffectInstance(MobEffects.WITHER));
+                        if(!getTags().contains("has_oxygen"))
+                        {
+                            addEffect(new MobEffectInstance(MobEffects.WITHER));
+                        }
+                    }
+                    if(planetData.getInt("temperature")<263)
+                    {
+                        if(!getTags().contains("has_heat"))
+                        {
+                            setTicksFrozen(200);
+                        }
+                    }
+                    if(planetData.getInt("temperature")>313)
+                    {
+                        if(!getTags().contains("has_cooling"))
+                        {
+                            setRemainingFireTicks(20);
+                        }
                     }
                 }
-                if(planetData.getInt("temperature")<263)
-                {
-                    if(!getTags().contains("has_heat"))
-                    {
-                        setTicksFrozen(20);
-                    }
-                }
-                if(planetData.getInt("temperature")>313)
-                {
-                    if(!getTags().contains("has_cooling"))
-                    {
-                        setRemainingFireTicks(20);
-                    }
-                }
+
 
             }
             if(!level().isClientSide)

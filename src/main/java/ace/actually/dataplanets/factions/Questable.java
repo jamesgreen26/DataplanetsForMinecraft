@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -65,13 +66,14 @@ public class Questable {
 
     }
 
-    public static void interpret(ServerPlayer spe, String string)
+    public static void interpret(ServerPlayer spe)
     {
         CompoundTag quests = spe.server.getCommandStorage().get(QUESTING);
         CompoundTag player = quests.getCompound(spe.getStringUUID());
-
+        String string = player.getString("task");
         if(player.getString("task").contains("visit"))
         {
+
             String[] split = string.split(" ");
             if(spe.serverLevel().dimension()==ResourceKey.create(Registries.DIMENSION,ResourceLocation.parse(split[1])))
             {
@@ -102,13 +104,14 @@ public class Questable {
         {
             player.putString("task",player.getString("return"));
             player.putString("return","finished");
+            spe.sendSystemMessage(Component.literal("Finished the task!"));
         }
         else
         {
             player.putString("task","not started");
             String[] v = player.getString("reward").split(",");
             Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(v[0]));
-
+            spe.sendSystemMessage(Component.literal("Quest completed, reward added!"));
             spe.addItem(new ItemStack(item,Integer.parseInt(v[1])));
         }
         quests.put(spe.getStringUUID(),player);
