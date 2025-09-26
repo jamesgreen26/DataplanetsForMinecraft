@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 
 public class NeumEntity extends PathfinderMob {
 
-    protected NeumEntity(EntityType<? extends PathfinderMob> p_21683_, Level p_21684_) {
+    public NeumEntity(EntityType<? extends PathfinderMob> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
     }
 

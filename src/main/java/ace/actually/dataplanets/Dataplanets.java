@@ -1,12 +1,15 @@
 package ace.actually.dataplanets;
 
 import ace.actually.dataplanets.compat.Compat;
+import ace.actually.dataplanets.entities.NeumEntityRenderer;
 import ace.actually.dataplanets.registry.*;
 import ace.actually.dataplanets.space.S2PSyncPacket;
 import ace.actually.dataplanets.space.StarSystemCreator;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -47,12 +50,12 @@ public class Dataplanets
 
         DPItems.init();
         DPBlocks.init();
+        DPEntities.init();
 
         MinecraftForge.EVENT_BUS.register(this);
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Compat.modEventBusLoad(bus);
-
 
 
     }
@@ -61,6 +64,12 @@ public class Dataplanets
     public void playerLogsIn(PlayerEvent.PlayerLoggedInEvent event)
     {
         Compat.postLoadWorld();
+    }
+
+    @SubscribeEvent
+    public void entityRenderers(EntityRenderersEvent.RegisterRenderers event)
+    {
+        //event.registerEntityRenderer(DPEntities.NEUM.get(), NeumEntityRenderer::new);
     }
 
     @SubscribeEvent
