@@ -191,6 +191,7 @@ dependencies {
     implementation fg.deobf("curse.maven:embeddium-908741:5681725")
     implementation fg.deobf("curse.maven:ferritecore-429235:4810975")
     implementation fg.deobf("curse.maven:modernfix-790626:6837713")
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.0"))
     api("io.github.llamalad7:mixinextras-forge:0.2.0")
     // apply a newer mixin AP to fix an issue with building the Lithium mixins
