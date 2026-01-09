@@ -1,18 +1,13 @@
 {
   "required": true,
-  "package": "ace.actually.dataplanets.mixin",
+  "package": "shipwrights.dataplanets.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "mixins.dataplanets.refmap.json",
   "mixins": [
-    "MappedRegistryMixin",
-    "MinecraftServerMixin",
-    "ServerPlayerMixin"
+    "LivingEntityMixin",
+    "MinecraftServerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "client": [
-    "ClientLanguageMixin",
-    "LevelRendererMixin"
-  ]
+  }
 }
