@@ -88,7 +88,7 @@ public class SystemCreator {
         );
 
         SpaceRegistryInvoker spaceRegistryInvoker = (SpaceRegistryInvoker) GenesisMod.SPACE_REGISTRY;
-        spaceRegistryInvoker.addCelestial(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.name()),celestial);
+        spaceRegistryInvoker.addBody(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.name()),celestial);
         return planetData;
     }
 

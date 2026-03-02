@@ -10,5 +10,5 @@ import shipwrights.genesis.space.registry.SpaceRegistry;
 public interface SpaceRegistryInvoker {
 
     @Invoker("addCelestial")
-    void addCelestial(ResourceLocation id, Celestial it);
+    void addBody(ResourceLocation id, Celestial it);
 }
