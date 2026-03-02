@@ -20,6 +20,10 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
 import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.mixin.MinecraftServerAccessor;
+import shipwrights.dataplanets.mixin.SpaceRegistryInvoker;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.registry.SpaceRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -205,6 +209,7 @@ public class RegistryUtil {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write " + path + " file: " + resourceLocation, e);
         }
+
     }
 
     /**
@@ -324,4 +329,5 @@ public class RegistryUtil {
             DataplanetsMod.LOGGER.error("Tag will take effect after datapack reload.");
         }
     }
+
 }

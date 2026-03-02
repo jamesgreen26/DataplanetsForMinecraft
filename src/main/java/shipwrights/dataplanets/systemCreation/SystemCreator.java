@@ -14,12 +14,19 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import shipwrights.dataplanets.PlanetLookup;
 import shipwrights.dataplanets.compat.Compat;
+import shipwrights.dataplanets.mixin.SpaceRegistryInvoker;
 import shipwrights.dataplanets.systemCreation.naming.SystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.dimension.biome.BiomeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.noise.TerrainGenCreator;
 import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 import shipwrights.dataplanets.runtimeRegistration.ServerPhase;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.transformProvider.CelestialTransformProvider;
+import shipwrights.genesis.space.transformProvider.OrbitingTransformProvider;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
+import shipwrights.genesis.space.type.CelestialType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +76,19 @@ public class SystemCreator {
 
         RegistryUtil.registerLevelStem(context.server, ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name()), stem, context.serverPhase);
 
+        Celestial celestial = new Celestial(
+                new OrbitingTransformProvider(ResourceLocation.tryParse("genesis:sun"),4443,planetData.distanceFromStar(),planetData.orbitalPeriod(),24000),
+                ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.name()),
+                BuiltinCelestialTypes.BODY,
+                planetData.size(),
+                planetData.gravity(),
+                planetData.color().red(),
+                planetData.color().green(),
+                planetData.color().blue()
+        );
+
+        SpaceRegistryInvoker spaceRegistryInvoker = (SpaceRegistryInvoker) GenesisMod.SPACE_REGISTRY;
+        spaceRegistryInvoker.addCelestial(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.name()),celestial);
         return planetData;
     }
 

@@ -5,7 +5,8 @@
   "refmap": "mixins.dataplanets.refmap.json",
   "mixins": [
     "LivingEntityMixin",
-    "MinecraftServerAccessor"
+    "MinecraftServerAccessor",
+    "SpaceRegistryInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
